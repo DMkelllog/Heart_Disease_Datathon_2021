@@ -29,11 +29,12 @@ def resize_crop(img, mask, resize_h=400, resize_w=600, crop_size=100):
 
 for mode in ['train', 'validation']:
     for version in ['A2C', 'A4C']:
-        os.makedirs(f'data/resize_crop/{mode}/{version}', exist_ok=True)
+        os.makedirs(f'data/resize_crop/{mode}/{version}/img', exist_ok=True)
+        os.makedirs(f'data/resize_crop/{mode}/{version}/mask', exist_ok=True)
         print(f'{mode} {version}')
         img_list = sorted(os.listdir(f'data/original/{mode}/{version}'))
         for img_name in img_list:
-            print(img_name)
+            # print(img_name)
             if img_name.endswith('.png'):
                 img = plt.imread(f'data/original/{mode}/{version}/' + img_name)
                 mask = np.load(f'data/original/{mode}/{version}/' + img_name.replace('png', 'npy'))
@@ -46,5 +47,5 @@ for mode in ['train', 'validation']:
                 mask = mask.numpy()
                 mask = mask.transpose(1, 2, 0)
                 
-                plt.imsave(f'data/resize_crop/{mode}/{version}/' + img_name, img[:,:,:3])
-                np.save(f'data/resize_crop/{mode}/{version}/' + img_name.replace('png', 'npy'), mask)
+                plt.imsave(f'data/resize_crop/{mode}/{version}/img/' + img_name, img[:,:,:3])
+                np.save(f'data/resize_crop/{mode}/{version}/mask/' + img_name.replace('png', 'npy'), mask)
