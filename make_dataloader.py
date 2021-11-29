@@ -61,3 +61,4 @@ if __name__ == '__main__':
     train_4_dataloader = DataLoader(train_2_dataset, batch_size=40, shuffle=False)
     val_2_dataloader = DataLoader(val_2_dataset, batch_size=40, shuffle=False)
     val_4_dataloader = DataLoader(val_4_dataset, batch_size=40, shuffle=False)
+    # hi
