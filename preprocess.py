@@ -37,7 +37,7 @@ for mode in ['train', 'validation']:
             # print(img_name)
             if img_name.endswith('.png'):
                 img = plt.imread(f'data/original/{mode}/{version}/' + img_name)
-                mask = np.load(f'data/original/{mode}/{version}/' + img_name.replace('png', 'npy'))
+                mask = np.load(f'data/original/{mode}/{version}/' + img_name.replace('png', 'npy')) * 255
                 img, mask = remove_topnoise(img, mask)
                 img, mask = resize_crop(img, mask)
 
