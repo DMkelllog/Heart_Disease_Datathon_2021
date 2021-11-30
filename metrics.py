@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 # DSC
 def get_DC(SR,GT,threshold=0.5):
@@ -22,7 +23,23 @@ def get_JS(SR,GT,threshold=0.5):
     
     JS = float(Inter)/(float(Union) + 1e-6)
     
-    return JS
+    return JS, SR, GT
+
+class DiceLoss(nn.Module):
+
+    def __init__(self):
+        super(DiceLoss, self).__init__()
+        self.smooth = 1.0
+
+    def forward(self, y_pred, y_true):
+        assert y_pred.size() == y_true.size()
+        y_pred = y_pred[:, 0].contiguous().view(-1)
+        y_true = y_true[:, 0].contiguous().view(-1)
+        intersection = (y_pred * y_true).sum()
+        dsc = (2. * intersection + self.smooth) / (
+            y_pred.sum() + y_true.sum() + self.smooth
+        )
+        return 1. - dsc
 
 """
 for i, (images, GT) in enumerate(self.train_loader):
