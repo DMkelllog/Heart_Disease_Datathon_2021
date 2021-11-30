@@ -40,8 +40,8 @@ def main(args):
 
     optimizer = torch.optim.Adam(unet.parameters(), lr=args.lr)
 
-    # criterion = DiceLoss()
-    criterion = nn.BCELoss()
+    criterion = DiceLoss()
+    # criterion = nn.BCELoss()
     loss_valid = []
 
     for epoch in range(args.epochs):

@@ -43,7 +43,7 @@ class CustomDataset(Dataset):
 
         if self.transform:
             img = self.transform(img)
-            mask = self.transform(mask)
+            mask = self.transform(mask*255)
 
         return img, mask
 
