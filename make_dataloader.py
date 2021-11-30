@@ -9,23 +9,23 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 
 # make pickle
-for mode in ['train', 'validation']:
-    for version in ['A2C', 'A4C']:
-        X_list = []
-        y_list = []
+# for mode in ['train', 'validation']:
+#     for version in ['A2C', 'A4C']:
+#         X_list = []
+#         y_list = []
 
-        PATH = f'data/resize_crop/{mode}/{version}'
-        img_list = sorted(os.listdir(f'{PATH}/img/'))
+#         PATH = f'data/resize_crop/{mode}/{version}'
+#         img_list = sorted(os.listdir(f'{PATH}/img/'))
 
-        for img_name in img_list:
-            img = plt.imread(f'{PATH}/img/{img_name}')
-            mask = np.load(f'{PATH}/mask/{img_name[:-4]}.npy')
+#         for img_name in img_list:
+#             img = plt.imread(f'{PATH}/img/{img_name}')
+#             mask = np.load(f'{PATH}/mask/{img_name[:-4]}.npy')
 
-            X_list.append(img[:, :, :3])
-            y_list.append(mask)
+#             X_list.append(img[:, :, :3])
+#             y_list.append(mask)
 
-        with open(f'data/{mode}_{version}.pickle', 'wb') as f:
-            pickle.dump([np.array(X_list), np.array(y_list)], f)
+#         with open(f'data/{mode}_{version}.pickle', 'wb') as f:
+#             pickle.dump([np.array(X_list), np.array(y_list)], f)
 
 # data loader
 class CustomDataset(Dataset):
