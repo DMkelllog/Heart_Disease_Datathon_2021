@@ -37,7 +37,7 @@ for mode in ['train', 'validation']:
             # print(img_name)
             if img_name.endswith('.png'):
                 img = plt.imread(f'data/original/{mode}/{version}/' + img_name)
-                mask = np.load(f'data/original/{mode}/{version}/' + img_name.replace('png', 'npy'))
+                mask = np.load(f'data/original/{mode}/{version}/' + img_name.replace('png', 'npy')) * 255
                 img, mask = remove_topnoise(img, mask)
                 img, mask = resize_crop(img, mask)
 
@@ -45,7 +45,7 @@ for mode in ['train', 'validation']:
                 img = img.transpose(1, 2, 0)
 
                 mask = mask.numpy()
-                mask = mask.transpose(1, 2, 0)
+                mask = mask.transpose(1, 2, 0) * 255
                 
                 plt.imsave(f'data/resize_crop/{mode}/{version}/img/' + img_name, img[:,:,:3])
                 np.save(f'data/resize_crop/{mode}/{version}/mask/' + img_name.replace('png', 'npy'), mask)
