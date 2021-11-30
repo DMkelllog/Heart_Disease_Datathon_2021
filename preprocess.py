@@ -45,7 +45,7 @@ for mode in ['train', 'validation']:
                 img = img.transpose(1, 2, 0)
 
                 mask = mask.numpy()
-                mask = mask.transpose(1, 2, 0) * 255
+                mask = mask.transpose(1, 2, 0)
                 
                 plt.imsave(f'data/resize_crop/{mode}/{version}/img/' + img_name, img[:,:,:3])
                 np.save(f'data/resize_crop/{mode}/{version}/mask/' + img_name.replace('png', 'npy'), mask)
