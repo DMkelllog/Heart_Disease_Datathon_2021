@@ -1,17 +1,20 @@
 
 from metrics import get_DC, get_JS, DiceLoss
 from tqdm import tqdm
+import torchvision
 import os
 import numpy as np
 import torch
 from make_dataloader import CustomDataset
 from torch.utils.data import Dataset, DataLoader
 import argparse
+from unet import pretrained_unet
+import torch.nn as nn
 
-train_2_dataset = CustomDataset('train', 'A2C')
-train_4_dataset = CustomDataset('train', 'A4C')
-val_2_dataset = CustomDataset('validation', 'A2C')
-val_4_dataset = CustomDataset('validation', 'A4C')
+train_2_dataset = CustomDataset('train', 'A2C',transform = torchvision.transforms.ToTensor())
+train_4_dataset = CustomDataset('train', 'A4C', transform = torchvision.transforms.ToTensor())
+val_2_dataset = CustomDataset('validation', 'A2C', transform = torchvision.transforms.ToTensor())
+val_4_dataset = CustomDataset('validation', 'A4C', transform = torchvision.transforms.ToTensor())
 train_2_4_dataset= []
 test_2_4_dataset = []
 for i in range(len(train_2_dataset)):
@@ -30,26 +33,25 @@ def main(args):
     device = torch.device("cuda:0")
 
     loaders = {"train": train_loader, "valid": valid_loader}
-    unet = torch.hub.load('mateuszbuda/brain-segmentation-pytorch', 'unet',
-        in_channels=3, out_channels=1, init_features=32, pretrained=True)
-
+    unet = pretrained_unet(True)
     unet.to(device)
 
     best_validation_dsc =np.inf 
 
     optimizer = torch.optim.Adam(unet.parameters(), lr=args.lr)
 
-    loss_train = []
+    # criterion = DiceLoss()
+    criterion = nn.BCELoss()
     loss_valid = []
-    criterion = DiceLoss()
 
-    for epoch in tqdm(range(args.epochs), total=args.epochs):
+    for epoch in range(args.epochs):
         for phase in ["train", "valid"]:
             if phase == "train":
                 unet.train()
             else:
                 unet.eval()
 
+            total_num, total_loss = 0,0
 
             for i, data in enumerate(loaders[phase]):
 
@@ -58,21 +60,21 @@ def main(args):
 
                 optimizer.zero_grad()
 
-                with torch.set_grad_enabled(phase == "train"):
-                    y_pred = unet(x)
+                y_pred = unet(x)
 
-                    loss = criterion(y_pred, y_true)
+                loss = criterion(y_pred, y_true)
+                total_num +=x.size(0)
+                total_loss += loss.item()
 
-                    if phase == "valid":
-                        loss_valid.append(loss.item())
+                if phase == "train":
+                    loss.backward()
+                    optimizer.step()
+            train_loss = total_loss/total_num
+            print(f"{phase} {epoch}/{args.epochs} {train_loss:.6f}")
 
-                    if phase == "train":
-                        loss_train.append(loss.item())
-                        loss.backward()
-                        optimizer.step()
-
-                if loss_valid[-1]< best_validation_dsc:
-                    best_validation_dsc = loss_valid[-1] 
+            if phase == "valid":
+                if train_loss < best_validation_dsc:
+                    best_validation_dsc = train_loss 
                     torch.save(unet.state_dict(), "unet.pth")
 
     print("Best validation mean DSC: {:4f}".format(best_validation_dsc))
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lr",
         type=float,
-        default=0.0001,
+        default=0.001,
         help="initial learning rate (default: 0.001)",
     )
     args = parser.parse_args()
