@@ -8,7 +8,6 @@ import albumentations as A
 from PIL import Image
 
 
-# data loader
 class CustomDataset(Dataset):
     def __init__(self, mode, version, transform=False):
         with open(f'data/{mode}_{version}.pickle', 'rb') as f:
