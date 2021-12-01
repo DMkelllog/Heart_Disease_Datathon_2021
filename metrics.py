@@ -23,7 +23,7 @@ def get_JS(SR,GT,threshold=0.5):
     
     JS = float(Inter)/(float(Union) + 1e-6)
     
-    return JS, SR, GT
+    return JS
 
 class DiceLoss(nn.Module):
 

@@ -70,7 +70,7 @@ def main(args):
                     loss.backward()
                     optimizer.step()
             train_loss = total_loss/total_num
-            print(f"{phase} {epoch}/{args.epochs} {train_loss:.6f}")
+            print(f"{phase} {epoch}/{args.epochs} {train_loss*1000:.4f}")
 
             if phase == "valid":
                 if train_loss < best_validation_dsc:
