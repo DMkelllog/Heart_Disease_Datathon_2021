@@ -6,6 +6,7 @@ import pickle
 import torch
 from torch.utils.data import Dataset, DataLoader
 
+from PIL import Image
 import torchvision.transforms as transforms
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -44,8 +45,8 @@ class CustomDataset(Dataset):
         img, mask = self.X[index], self.y[index]
 
         if type(self.transform) == transforms.Compose:
-            img = self.transform(img)
-            mask = self.transform(mask)
+            img = self.transform(Image.fromarray((img*255).astype(np.uint8)))
+            mask = self.transform(Image.fromarray((np.squeeze(mask, axis=2)*255).astype(np.uint8)))
 
         elif type(self.transform) == A.Compose:
             transformed = self.transform(image=img, mask=mask)

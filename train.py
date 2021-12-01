@@ -33,7 +33,7 @@ def main(args):
     device = torch.device("cuda:0")
 
     loaders = {"train": train_loader, "valid": valid_loader}
-    unet = pretrained_unet(True)
+    unet = pretrained_unet(False)
     unet.to(device)
 
     best_validation_dsc =np.inf 
