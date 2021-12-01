@@ -33,7 +33,7 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-def create_loader(transform, random_seed=42, batch_size=16, mode='base'):
+def make_dataloader(transform, random_seed=42, batch_size=16, mode='base'):
     #for train & val
     base_transform = A.Compose([
         A.pytorch.ToTensorV2(transpose_mask=True)
@@ -102,10 +102,6 @@ def create_loader(transform, random_seed=42, batch_size=16, mode='base'):
     test_4_loader = DataLoader(test_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     
     return (train_2_4_loader, val_2_4_loader, test_2_4_loader), (train_2_loader, val_2_loader, test_2_loader), (train_4_loader, val_4_loader, test_4_loader)
-
-def make_dataloader(dataset, batch_size, transform=False, shuffle=False):
-    loader = DataLoader(dataset, batch_size, shuffle=shuffle)
-    return loader
 
 class EarlyStopping:
     """주어진 patience 이후로 validation loss가 개선되지 않으면 학습을 조기 중지"""
