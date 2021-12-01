@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from torchvision import transforms
-
+import pickle
 
 def remove_topnoise(img, mask):
     cand1 = int(img.shape[1] / 8 * 7)
@@ -46,6 +46,28 @@ for mode in ['train', 'validation']:
 
                 mask = mask.numpy()
                 mask = mask.transpose(1, 2, 0)
+                mask = (mask>0.5)+0
                 
                 plt.imsave(f'data/resize_crop/{mode}/{version}/img/' + img_name, img[:,:,:3])
                 np.save(f'data/resize_crop/{mode}/{version}/mask/' + img_name.replace('png', 'npy'), mask)
+
+# make pickle
+for mode in ['train', 'validation']:
+    for version in ['A2C', 'A4C']:
+        X_list = []
+        y_list = []
+
+        PATH = f'data/resize_crop/{mode}/{version}'
+        img_list = sorted(os.listdir(f'{PATH}/img/'))
+
+        for img_name in img_list:
+            img = plt.imread(f'{PATH}/img/{img_name}')
+            mask = np.load(f'{PATH}/mask/{img_name[:-4]}.npy')
+
+            X_list.append(img[:, :, :3])
+            y_list.append(mask)
+
+        with open(f'data/{mode}_{version}.pickle', 'wb') as f:
+            pickle.dump([np.array(X_list), np.array(y_list)], f)
+
+print('pickle files created')
