@@ -1,30 +1,15 @@
-import pickle
+import torch
 import numpy as np
-<<<<<<< HEAD
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
 import pickle
 import torchvision.transforms as transforms
 import albumentations as A
 from sklearn.model_selection import train_test_split
-
+from PIL import Image
 
 class CustomDataset(Dataset):
     def __init__(self, X, y, transform=False):
-=======
-import torch
-from torch.utils.data import Dataset, DataLoader
-import torch.nn.functional as F
-import torchvision.transforms as transform
-import albumentations as A
-from PIL import Image
-
-
-class CustomDataset(Dataset):
-    def __init__(self, mode, version, transform=False):
-        with open(f'data/{mode}_{version}.pickle', 'rb') as f:
-            X, y = pickle.load(f)
->>>>>>> 23da15a1e2d0e5288862ad03f3d81cfd5d85b224
         
         self.X = X
         self.y = y
@@ -32,22 +17,11 @@ class CustomDataset(Dataset):
         self.transform = transform
         
     def __getitem__(self, index):
-        img, mask = self.X[index], self.y[index]*255
+        img, mask = self.X[index], self.y[index]
 
-<<<<<<< HEAD
         if type(self.transform) == transforms.Compose:
-            img = self.transform(img)
-            mask = self.transform(mask)
-=======
-        if type(self.transform) == transform.Compose:
             img = self.transform(Image.fromarray((img*255).astype(np.uint8)))
             mask = self.transform(Image.fromarray((np.squeeze(mask, axis=2)*255).astype(np.uint8)))
-
-        elif type(self.transform) == A.Compose:
-            transformed = self.transform(image=img, mask=mask)
-            img = transformed['image']
-            mask = transformed['mask']
->>>>>>> 23da15a1e2d0e5288862ad03f3d81cfd5d85b224
 
         elif type(self.transform) == A.Compose:
             transformed = self.transform(image=img, mask=mask)
@@ -59,7 +33,6 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-<<<<<<< HEAD
 def create_loader(transform, random_seed=42, batch_size=16, mode='base'):
     #for train & val
     base_transform = A.Compose([
@@ -71,6 +44,7 @@ def create_loader(transform, random_seed=42, batch_size=16, mode='base'):
         filename = ''
     elif mode == 'caranet':
         filename = '_2'
+        
     for version in ['A2C', 'A4C']:
         with open(f'data/{train_mode}_{version}{filename}.pickle', 'rb') as f:
             X, y = pickle.load(f)
@@ -131,12 +105,6 @@ def create_loader(transform, random_seed=42, batch_size=16, mode='base'):
 
 def make_dataloader(dataset, batch_size, transform=False, shuffle=False):
     loader = DataLoader(dataset, batch_size, shuffle=shuffle)
-=======
-def make_dataloader(mode, version, batch_size, transform=False):
-    dataset = CustomDataset(mode, version, transform)
-    loader = DataLoader(dataset, batch_size, shuffle=True)
-
->>>>>>> 23da15a1e2d0e5288862ad03f3d81cfd5d85b224
     return loader
 
 class EarlyStopping:
@@ -228,7 +196,7 @@ def evaluate(model, testloader, mode='base'):
     pred_mask_list = np.vstack(pred_mask_list)
     gt_mask_list = np.vstack(gt_mask_list)
     pred_mask_list_hard = ((pred_mask_list > 0.5) + 0)
-    print(gt_mask_list.shape, pred_mask_list_hard.shape)
+    # print(gt_mask_list.shape, pred_mask_list_hard.shape)
     
 
     DS_list = []
