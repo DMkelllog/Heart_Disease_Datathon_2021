@@ -41,7 +41,7 @@ class CustomDataset(Dataset):
         self.transform = transform
         
     def __getitem__(self, index):
-        img, mask = self.X[index], self.y[index]*255
+        img, mask = self.X[index], self.y[index]
 
         if type(self.transform) == transforms.Compose:
             img = self.transform(img)

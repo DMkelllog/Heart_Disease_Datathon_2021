@@ -1,26 +1,22 @@
-import os
-import argparse
-from tqdm import tqdm
 
-import numpy as np
-
-import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-import torchvision
-
-from make_dataloader import CustomDataset
-from unet import pretrained_unet
 from metrics import get_DC, get_JS, DiceLoss
+from tqdm import tqdm
+import torchvision
+import os
+import numpy as np
+import torch
+from make_dataloader import CustomDataset
+from torch.utils.data import Dataset, DataLoader
+import argparse
+from unet import pretrained_unet
+import torch.nn as nn
 
-train_2_dataset = CustomDataset('train', 'A2C', transform = torchvision.transforms.ToTensor())
+train_2_dataset = CustomDataset('train', 'A2C',transform = torchvision.transforms.ToTensor())
 train_4_dataset = CustomDataset('train', 'A4C', transform = torchvision.transforms.ToTensor())
 val_2_dataset = CustomDataset('validation', 'A2C', transform = torchvision.transforms.ToTensor())
 val_4_dataset = CustomDataset('validation', 'A4C', transform = torchvision.transforms.ToTensor())
-
 train_2_4_dataset= []
 test_2_4_dataset = []
-
 for i in range(len(train_2_dataset)):
     train_2_4_dataset.append(train_2_dataset[i])
     train_2_4_dataset.append(train_4_dataset[i])
@@ -47,7 +43,6 @@ def main(args):
     criterion = DiceLoss()
     # criterion = nn.BCELoss()
     loss_valid = []
-
     for epoch in range(args.epochs):
         for phase in ["train", "valid"]:
             if phase == "train":

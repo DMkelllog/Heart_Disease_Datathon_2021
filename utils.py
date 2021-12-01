@@ -107,10 +107,12 @@ def evaluate(model, testloader, mode='base'):
     with torch.no_grad():
         for img, gt_mask in testloader:
             output = model(img.cuda().permute(0,3,1,2))
+            # output = model(img.cuda())
             if mode=='base': # 일반적인 모델
                 pred_mask_list.append(output.cpu().numpy())
             elif mode=='caranet': # 종욱이 모델
                 pred_mask_list.append(output[0].sigmoid().cpu().numpy()) 
+
 
             gt_mask_list.append(gt_mask.numpy())
     pred_mask_list = np.vstack(pred_mask_list)
