@@ -68,40 +68,25 @@ def make_dataloader(transform, random_seed=42, batch_size=16, mode='base'):
     test_2_4 = [np.array(img).reshape(-1, X[0].shape[1], X[0].shape[1], 3), np.array(mask).reshape(-1, X[0].shape[1], X[0].shape[1], 1)]
     print(f'test image shape: {test_2_4[0].shape} \ntest mask shape: {test_2_4[1].shape}')
 
-    train_2_4_img, val_2_4_img = train_test_split(train_2_4[0], test_size=0.125, random_state=random_seed)
-    train_2_4_mask, val_2_4_mask = train_test_split(train_2_4[1], test_size=0.125, random_state=random_seed)
-
-    train_2_img, val_2_img = train_test_split(train_2[0], test_size=0.125, random_state=random_seed)
-    train_2_mask, val_2_mask = train_test_split(train_2[1], test_size=0.125, random_state=random_seed)
-
-    train_4_img, val_4_img = train_test_split(train_4[0], test_size=0.125, random_state=random_seed)
-    train_4_mask, val_4_mask = train_test_split(train_4[1], test_size=0.125, random_state=random_seed)
-
-    train_2_4_dataset = CustomDataset(train_2_4_img, train_2_4_mask, transform=transform)
-    val_2_4_dataset = CustomDataset(val_2_4_img, val_2_4_mask, transform=base_transform)
+    train_2_4_dataset = CustomDataset(train_2_4[0], train_2_4[1], transform=transform)
     test_2_4_dataset = CustomDataset(test_2_4[0], test_2_4[1], transform=base_transform)
 
-    train_2_dataset = CustomDataset(train_2_img, train_2_mask, transform=transform)
-    val_2_dataset = CustomDataset(val_2_img, val_2_mask, transform=base_transform)
+    train_2_dataset = CustomDataset(train_2[0], train_2[1], transform=transform)
     test_2_dataset = CustomDataset(test_2[0], test_2[1], transform=base_transform)
 
-    train_4_dataset = CustomDataset(train_4_img, train_4_mask, transform=transform)
-    val_4_dataset = CustomDataset(val_4_img, val_4_mask, transform=base_transform)
+    train_4_dataset = CustomDataset(train_4[0], train_4[1], transform=transform)
     test_4_dataset = CustomDataset(test_4[0], test_4[1], transform=base_transform)
 
     train_2_4_loader = DataLoader(train_2_4_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_2_4_loader = DataLoader(val_2_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     test_2_4_loader = DataLoader(test_2_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     train_2_loader = DataLoader(train_2_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_2_loader = DataLoader(val_2_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     test_2_loader = DataLoader(test_2_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     train_4_loader = DataLoader(train_4_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    val_4_loader = DataLoader(val_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     test_4_loader = DataLoader(test_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     
-    return (train_2_4_loader, val_2_4_loader, test_2_4_loader), (train_2_loader, val_2_loader, test_2_loader), (train_4_loader, val_4_loader, test_4_loader)
+    return (train_2_4_loader, test_2_4_loader), (train_2_loader, test_2_loader), (train_4_loader, test_4_loader)
 
 class EarlyStopping:
     """주어진 patience 이후로 validation loss가 개선되지 않으면 학습을 조기 중지"""
