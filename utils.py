@@ -1,13 +1,17 @@
-import torch
-import numpy as np
-from torch.utils.data import Dataset
-import torch.nn.functional as F
 import pickle
+import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
+import torch.nn.functional as F
+import torchvision.transforms as transform
+import albumentations as A
+from PIL import Image
 
 
+# data loader
 class CustomDataset(Dataset):
     def __init__(self, mode, version, transform=False):
-        with open(f'data/{mode}_{version}_2.pickle', 'rb') as f:
+        with open(f'data/{mode}_{version}.pickle', 'rb') as f:
             X, y = pickle.load(f)
         
         self.X = X
@@ -16,16 +20,27 @@ class CustomDataset(Dataset):
         self.transform = transform
         
     def __getitem__(self, index):
-        img, mask = self.X[index], self.y[index]
+        img, mask = self.X[index], self.y[index]*255
 
-        if self.transform:
-            img = self.transform(img)
-            mask = self.transform(mask)
+        if type(self.transform) == transform.Compose:
+            img = self.transform(Image.fromarray((img*255).astype(np.uint8)))
+            mask = self.transform(Image.fromarray((np.squeeze(mask, axis=2)*255).astype(np.uint8)))
+
+        elif type(self.transform) == A.Compose:
+            transformed = self.transform(image=img, mask=mask)
+            img = transformed['image']
+            mask = transformed['mask']
 
         return img, mask
 
     def __len__(self):
         return len(self.X)
+
+def make_dataloader(mode, version, batch_size, transform=False):
+    dataset = CustomDataset(mode, version, transform)
+    loader = DataLoader(dataset, batch_size, shuffle=True)
+
+    return loader
 
 class EarlyStopping:
     """주어진 patience 이후로 validation loss가 개선되지 않으면 학습을 조기 중지"""
