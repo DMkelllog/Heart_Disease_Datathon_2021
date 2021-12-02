@@ -1,5 +1,6 @@
 import argparse
 import os
+import csv
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,21 +56,23 @@ elif args.model_type == 'caranet':
     model = caranet().to(device)
 
 if args.pretrained_path is not None:
-    model.load_state_dict(torch.load(f'{args.pretrained_path}'))
-    train_mode = 'finetuning'
+    path = f'models/{args.pretrained_path}/model.pt'
+    model.load_state_dict(torch.load(path))
+    train_mode = f'{args.pretrained_path}_fine'
+    args.learning_rate = args.learning_rate / 10
 else:
-    train_mode = 'pre-training'
+    train_mode = 'pre'
 
 if args.memo is None:
-    model_path = f'{args.data_type}_{args.augmentation_type}_{args.model_type}_{train_mode}'
+    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}'
 else:
-    model_path = f'{args.data_type}_{args.augmentation_type}_{args.model_type}_{train_mode}_{args.memo}'
-    
+    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}_{args.memo}'
+
 folder_name = f'models/{model_path}'
 if not os.path.isdir(folder_name):
     os.mkdir(folder_name)
 
-filename = f'{folder_name}/{model_path}.pt'
+filename = f'{folder_name}/model.pt'
 
 # print(model_path)
 # print(filename)
@@ -84,7 +87,7 @@ criterion = DiceLoss()
 
 early_stopping = EarlyStopping(patience=args.early_stopping_patience, verbose=False, path = filename)
 loss_dict = {'train': [], 'val': []}
-
+# print(f'current learning rate: {args.learning_rate}')
 for epoch in range(args.num_epochs):
     model.train()
     
@@ -165,3 +168,7 @@ DS, JS = evaluate(model, val_loader, mode)
 with open(f'{folder_name}/results.txt', 'w') as f:
     f.write(f'Dice Similarity: {DS:0.4f}\n')
     f.write(f'Jaccard Similarity: {JS:0.4f}')
+
+with open('result.csv', 'a', newline='') as f:
+    wr=csv.writer(f)
+    wr.writerow([model_path, np.round(DS,5), np.round(JS,5)])
