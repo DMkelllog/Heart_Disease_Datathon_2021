@@ -5,8 +5,17 @@ import torch.nn.functional as F
 import pickle
 import torchvision.transforms as transforms
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
 from sklearn.model_selection import train_test_split
 from PIL import Image
+
+
+def split_train_test(img, mask, random_seed):
+    train_img, test_img, train_mask, test_mask = train_test_split(img, mask, test_size=0.2, random_state=random_seed)
+    print(train_img.shape, train_mask.shape, test_img.shape, test_mask.shape)
+
+    return train_img, train_mask, test_img, test_mask
+
 
 class CustomDataset(Dataset):
     def __init__(self, X, y, transform=False):
@@ -30,60 +39,78 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-def make_dataloader(transform, random_seed=42, batch_size=16, mode='base'):
-    #for train & val
+def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='base'):
+    # for train & val
     base_transform = A.Compose([
-        A.pytorch.ToTensorV2(transpose_mask=True)
+        ToTensorV2(transpose_mask=True)
     ])
-    train_mode = 'train'
-    img, mask = [], []
+
     if mode == 'base':
         filename = ''
+
     elif mode == 'caranet':
         filename = '_2'
-        
-    for version in ['A2C', 'A4C']:
-        with open(f'data/{train_mode}_{version}{filename}.pickle', 'rb') as f:
-            X, y = pickle.load(f)
-        img.append(X)
-        mask.append(y)
-    train_2 = [img[0], mask[0]]
-    train_4 = [img[1], mask[1]]
-    train_2_4 = [np.array(img).reshape(-1, X[0].shape[1], X[0].shape[1], 3), np.array(mask).reshape(-1, X[0].shape[1], X[0].shape[1], 1)]
-    print(f'train image shape: {train_2_4[0].shape} \ntrain mask shape: {train_2_4[1].shape}')
 
-    # for test
-    train_mode = 'validation'
-    img, mask = [], []
-    for version in ['A2C', 'A4C']:
-        with open(f'data/{train_mode}_{version}{filename}.pickle', 'rb') as f:
-            X, y = pickle.load(f)
-        img.append(X)
-        mask.append(y)
-    test_2 = [img[0], mask[0]]
-    test_4 = [img[1], mask[1]]
-    test_2_4 = [np.array(img).reshape(-1, X[0].shape[1], X[0].shape[1], 3), np.array(mask).reshape(-1, X[0].shape[1], X[0].shape[1], 1)]
-    print(f'test image shape: {test_2_4[0].shape} \ntest mask shape: {test_2_4[1].shape}')
+    if data_type != 'both' and data_type != 'both_new':
+        if data_type == 'A2C' or data_type == 'A4C':
+            load_dir = ''
 
-    train_2_4_dataset = CustomDataset(train_2_4[0], train_2_4[1], transform=transform)
-    test_2_4_dataset = CustomDataset(test_2_4[0], test_2_4[1], transform=base_transform)
+            with open(f'data/{load_dir}/validation_{data_type[:3]}{filename}.pickle', 'rb') as f:
+                test_img, test_mask = pickle.load(f)
 
-    train_2_dataset = CustomDataset(train_2[0], train_2[1], transform=transform)
-    test_2_dataset = CustomDataset(test_2[0], test_2[1], transform=base_transform)
+        elif data_type == 'A2C_new' or data_type == 'A4C_new':
+            load_dir = 'CAMUS'
 
-    train_4_dataset = CustomDataset(train_4[0], train_4[1], transform=transform)
-    test_4_dataset = CustomDataset(test_4[0], test_4[1], transform=base_transform)
+        with open(f'data/{load_dir}/train_{data_type[:3]}{filename}.pickle', 'rb') as f:
+            train_img, train_mask = pickle.load(f)
 
-    train_2_4_loader = DataLoader(train_2_4_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_2_4_loader = DataLoader(test_2_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+        if data_type == 'A2C_new' or data_type == 'A4C_new':
+            train_img, test_img, train_mask, test_mask = train_test_split(
+                train_img, train_mask, test_size=0.2, random_state=random_seed)
 
-    train_2_loader = DataLoader(train_2_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_2_loader = DataLoader(test_2_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    else:
+        if data_type == 'both':
+            load_dir = ''
 
-    train_4_loader = DataLoader(train_4_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_4_loader = DataLoader(test_4_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-    
-    return (train_2_4_loader, test_2_4_loader), (train_2_loader, test_2_loader), (train_4_loader, test_4_loader)
+            both_ts_img, both_ts_mask = [], []
+            
+            for version in ['A2C', 'A4C']:
+                with open(f'data/{load_dir}/validation_{version}{filename}.pickle', 'rb') as f:
+                    test_img, test_mask = pickle.load(f)
+                    both_ts_img.extend(test_img)
+                    both_ts_mask.extend(test_mask)
+
+            test_img = np.array(both_ts_img)
+            test_mask = np.array(both_ts_mask)
+
+        elif data_type == 'both_new':
+            load_dir = 'CAMUS'
+
+        both_tr_img, both_tr_mask = [], []
+
+        for version in ['A2C', 'A4C']:
+            with open(f'data/{load_dir}/train_{version}{filename}.pickle', 'rb') as f:
+                train_img, train_mask = pickle.load(f)
+                both_tr_img.extend(train_img)
+                both_tr_mask.extend(train_mask)
+
+        train_img = np.array(both_tr_img)
+        train_mask = np.array(both_tr_mask)
+
+        if data_type == 'both_new':
+            train_img, test_img, train_mask, test_mask = train_test_split(
+                train_img, train_mask, test_size=0.2, random_state=random_seed)
+
+    print(train_img.shape, train_mask.shape)
+    print(test_img.shape, test_mask.shape)
+
+    train_data = CustomDataset(train_img, train_mask, transform=transform)
+    test_data = CustomDataset(test_img, test_mask, transform=base_transform)
+
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=4)
+
+    return train_loader, test_loader
 
 class EarlyStopping:
     """주어진 patience 이후로 validation loss가 개선되지 않으면 학습을 조기 중지"""
