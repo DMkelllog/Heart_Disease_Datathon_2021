@@ -9,14 +9,6 @@ from albumentations.pytorch import ToTensorV2
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-
-def split_train_test(img, mask, random_seed):
-    train_img, test_img, train_mask, test_mask = train_test_split(img, mask, test_size=0.2, random_state=random_seed)
-    print(train_img.shape, train_mask.shape, test_img.shape, test_mask.shape)
-
-    return train_img, train_mask, test_img, test_mask
-
-
 class CustomDataset(Dataset):
     def __init__(self, X, y, transform=False):
         
@@ -51,7 +43,7 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
     elif mode == 'caranet':
         filename = '_2'
 
-    if data_type != 'both' and data_type != 'both_new':
+    if data_type != 'both' and data_type != 'both_new' and data_type != 'bothboth':
         if data_type == 'A2C' or data_type == 'A4C':
             load_dir = ''
 
@@ -83,7 +75,7 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
             test_img = np.array(both_ts_img)
             test_mask = np.array(both_ts_mask)
 
-        elif data_type == 'both_new':
+        elif data_type == 'both_new' or data_type == 'bothboth':
             load_dir = 'CAMUS'
 
         both_tr_img, both_tr_mask = [], []
@@ -101,14 +93,48 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
             train_img, test_img, train_mask, test_mask = train_test_split(
                 train_img, train_mask, test_size=0.2, random_state=random_seed)
 
-    print(train_img.shape, train_mask.shape)
-    print(test_img.shape, test_mask.shape)
+        elif data_type == 'bothboth':
+            camus_tr_img, camus_tr_mask = [], []
+            both_tr_img, both_tr_mask = [], []
+            both_ts_img, both_ts_mask = [], []
+
+            for version in ['A2C', 'A4C']:
+                with open(f'data/CAMUS/train_{version}{filename}.pickle', 'rb') as f:
+                    camus_img, camus_mask = pickle.load(f)
+                    camus_tr_img.extend(camus_img)
+                    camus_tr_mask.extend(camus_mask)
+
+                with open(f'data/train_{version}{filename}.pickle', 'rb') as f:
+                    train_img, train_mask = pickle.load(f)
+                    both_tr_img.extend(train_img)
+                    both_tr_mask.extend(train_mask)
+
+                with open(f'data/validation_{version}{filename}.pickle', 'rb') as f:
+                    test_img, test_mask = pickle.load(f)
+                    both_ts_img.extend(test_img)
+                    both_ts_mask.extend(test_mask)
+
+            c_train_img, c_test_img, c_train_mask, c_test_mask = train_test_split(
+                np.array(camus_tr_img), np.array(camus_tr_mask), test_size=0.2, random_state=random_seed)
+            
+            both_tr_img.extend(c_train_img)
+            both_tr_mask.extend(c_train_mask)
+            both_ts_img.extend(c_test_img)
+            both_ts_mask.extend(c_test_mask)
+
+            train_img = np.array(both_tr_img)
+            train_mask = np.array(both_tr_mask)
+            test_img = np.array(both_ts_img)
+            test_mask = np.array(both_ts_mask)
+
+    print(f'train img shape : {train_img.shape}, train mask shape : {train_mask.shape}')
+    print(f'test img shape : {test_img.shape}, test mask shape : {test_mask.shape}')
 
     train_data = CustomDataset(train_img, train_mask, transform=transform)
     test_data = CustomDataset(test_img, test_mask, transform=base_transform)
 
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=4)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=4)
 
     return train_loader, test_loader
 
