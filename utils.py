@@ -18,12 +18,9 @@ class CustomDataset(Dataset):
         
     def __getitem__(self, index):
         img, mask = self.X[index], self.y[index]
+        img = (img*255).astype(np.uint8)
 
-        if type(self.transform) == transforms.Compose:
-            img = self.transform(Image.fromarray((img*255).astype(np.uint8)))
-            mask = self.transform(Image.fromarray((np.squeeze(mask, axis=2)*255).astype(np.uint8)))
-
-        elif type(self.transform) == A.Compose:
+        if self.transform:
             transformed = self.transform(image=img, mask=mask)
             img = transformed['image']
             mask = transformed['mask']
@@ -168,7 +165,7 @@ def evaluate(model, testloader, mode='base'):
     with torch.no_grad():
         for img, gt_mask in testloader:
 
-            output = model(img.cuda())
+            output = model(img.cuda().float())
             if mode=='base': # 일반적인 모델
                 pred_mask_list.append(output.cpu().numpy())
             elif mode=='caranet': # 종욱이 모델
