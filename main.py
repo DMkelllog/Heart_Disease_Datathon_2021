@@ -25,6 +25,7 @@ from models import caranet
 from unet import pretrained_unet
 
 from metrics import DiceLoss
+import time
 
 
 parser = argparse.ArgumentParser()
@@ -83,7 +84,7 @@ augmentation = get_training_augmentation(type=args.augmentation_type)
 train_loader, val_loader = make_dataloader(args.data_type, augmentation, args.random_seed, args.batch_size, mode)
 
 optimizer = Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=args.learning_rate/1000, verbose=False)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, min_lr=args.learning_rate/1000, verbose=False)
 criterion = DiceLoss()
 
 early_stopping = EarlyStopping(patience=args.early_stopping_patience, verbose=False, path = filename+'.pt')
@@ -91,7 +92,7 @@ loss_dict = {'train': [], 'val': []}
 # print(f'current learning rate: {args.learning_rate}')
 for epoch in range(args.num_epochs):
     model.train()
-    
+    start = time.time()
     train_losses = []
     for it_1, (img, mask) in enumerate(train_loader):
         #print(train_img)
@@ -160,7 +161,7 @@ for epoch in range(args.num_epochs):
     if epoch%5==4:
         torch.save(model.state_dict(), f'{filename}_{epoch}.pt')
             
-    print(f'Epoch {epoch} train_loss: {train_loss:0.5f}   val_loss: {valid_loss:0.5f}')
+    print(f'Epoch {epoch} train_loss: {train_loss:0.5f}   val_loss: {valid_loss:0.5f}  time: {time.time()-start:0.1f}')
 
 
 # evaluation
