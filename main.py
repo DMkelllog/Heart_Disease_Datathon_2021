@@ -65,7 +65,7 @@ if args.pretrained_path is not None:
         path = f'models/{args.pretrained_path}/model_{args.pretrained_epoch}.pt'
     model.load_state_dict(torch.load(path))
     train_mode = f'{args.pretrained_path}_fine'
-    args.learning_rate = args.learning_rate / 10
+    # args.learning_rate = args.learning_rate
 else:
     train_mode = 'pre'
 
