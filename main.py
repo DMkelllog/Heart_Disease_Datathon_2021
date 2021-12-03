@@ -30,7 +30,7 @@ import time
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--learning_rate', type=float, default=1e-4)
+parser.add_argument('--learning_rate', type=float, default=1e-3)
 parser.add_argument('--weight_decay', type=float, default=1e-10)
 parser.add_argument('--batch_size', type=int, default=16)
 parser.add_argument('--num_epochs', type=int, default=1000)
@@ -42,6 +42,7 @@ parser.add_argument('--augmentation_type', type=int, choices=[0, 1, 2, 3], defau
 
 parser.add_argument('--model_type', type=str, default='unet')
 parser.add_argument('--pretrained_path', type=str)
+parser.add_argument('--pretrained_epoch', choices=['4', '9', 'full'], type=str)
 parser.add_argument('--memo', type=str)
 
 args = parser.parse_args()
@@ -58,7 +59,10 @@ elif args.model_type == 'caranet':
     model = caranet().to(device)
 
 if args.pretrained_path is not None:
-    path = f'models/{args.pretrained_path}/model.pt'
+    if args.pretrained_epoch == 'full':
+        path = f'models/{args.pretrained_path}/model.pt'
+    else:
+        path = f'models/{args.pretrained_path}/model_{args.pretrained_epoch}.pt'
     model.load_state_dict(torch.load(path))
     train_mode = f'{args.pretrained_path}_fine'
     args.learning_rate = args.learning_rate / 10
