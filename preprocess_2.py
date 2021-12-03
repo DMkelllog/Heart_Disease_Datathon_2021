@@ -13,7 +13,6 @@ def remove_topnoise(img, mask):
     cutoff1 = np.where(img[:, cand1, :] < 0.01)[0][0]
     cutoff2 = np.where(img[:, cand2, :] < 0.01)[0][0]
 
-
     cutoff_min = np.min([cutoff1, cutoff2])
 
     return img[cutoff_min:, ], mask[cutoff_min:, ] 
