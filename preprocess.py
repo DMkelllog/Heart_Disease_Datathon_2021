@@ -16,7 +16,7 @@ def remove_topnoise(img, mask):
 
     return img[cutoff_min:, ], mask[cutoff_min:, ] 
 
-def resize_crop(img, mask, resize_h=400, resize_w=600, crop_size=100):
+def resize_crop(img, mask, resize_h=352, resize_w=528, crop_size=88):
     resize = transforms.Compose([transforms.ToTensor(), transforms.Resize((resize_h, resize_w))])
 
     img = resize(img)
@@ -29,8 +29,8 @@ def resize_crop(img, mask, resize_h=400, resize_w=600, crop_size=100):
 
 for mode in ['train', 'validation']:
     for version in ['A2C', 'A4C']:
-        os.makedirs(f'data/resize_crop/{mode}/{version}/img', exist_ok=True)
-        os.makedirs(f'data/resize_crop/{mode}/{version}/mask', exist_ok=True)
+        os.makedirs(f'data/resize_crop/{mode}/{version}_2/img', exist_ok=True)
+        os.makedirs(f'data/resize_crop/{mode}/{version}_2/mask', exist_ok=True)
         print(f'{mode} {version}')
         img_list = sorted(os.listdir(f'data/original/{mode}/{version}'))
         for img_name in img_list:
@@ -48,8 +48,8 @@ for mode in ['train', 'validation']:
                 mask = mask.transpose(1, 2, 0)
                 mask = (mask>0.5)+0
                 
-                plt.imsave(f'data/resize_crop/{mode}/{version}/img/' + img_name, img[:,:,:3])
-                np.save(f'data/resize_crop/{mode}/{version}/mask/' + img_name.replace('png', 'npy'), mask)
+                plt.imsave(f'data/resize_crop/{mode}/{version}_2/img/' + img_name, img[:,:,:3])
+                np.save(f'data/resize_crop/{mode}/{version}_2/mask/' + img_name.replace('png', 'npy'), mask)
 
 # make pickle
 for mode in ['train', 'validation']:
@@ -57,7 +57,7 @@ for mode in ['train', 'validation']:
         X_list = []
         y_list = []
 
-        PATH = f'data/resize_crop/{mode}/{version}'
+        PATH = f'data/resize_crop/{mode}/{version}_2'
         img_list = sorted(os.listdir(f'{PATH}/img/'))
 
         for img_name in img_list:
@@ -67,7 +67,7 @@ for mode in ['train', 'validation']:
             X_list.append(img[:, :, :3])
             y_list.append(mask)
 
-        with open(f'data/{mode}_{version}.pickle', 'wb') as f:
+        with open(f'data/{mode}_{version}_2.pickle', 'wb') as f:
             pickle.dump([np.array(X_list), np.array(y_list)], f)
 
 print('pickle files created')
