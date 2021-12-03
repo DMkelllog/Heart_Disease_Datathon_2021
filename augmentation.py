@@ -34,7 +34,7 @@ def get_training_augmentation(type=2):
             ),
             A.HorizontalFlip(),
             A.Rotate(limit=20),
-            A.ShiftScaleRotate(shift_limit=0.3),
+            A.ShiftScaleRotate(shift_limit=0.3, scale_limit=0, rotate_limit=0, border_mode=0),
             ToTensorV2(transpose_mask=True)
         ]
 
