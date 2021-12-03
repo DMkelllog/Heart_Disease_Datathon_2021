@@ -36,8 +36,8 @@ parser.add_argument('--num_epochs', type=int, default=1000)
 parser.add_argument('--early_stopping_patience', type=int, default=10)
 parser.add_argument('--random_seed', default=42)
 
-parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C', 'both', 'A2C_new', 'A4C_new', 'both_new'], default='both')
-parser.add_argument('--augmentation_type', type=int, choices=[0, 1, 2], default=0)
+parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C', 'both'], default='both')
+parser.add_argument('--augmentation_type', type=int, choices=[0, 1, 2, 3], default=0)
 
 parser.add_argument('--model_type', type=str, default='unet')
 parser.add_argument('--pretrained_path', type=str)
