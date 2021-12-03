@@ -45,6 +45,7 @@ parser.add_argument('--memo', type=str)
 
 args = parser.parse_args()
 
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 date_time = datetime.datetime.now().strftime("%m-%d_%H-%M")
 
@@ -85,7 +86,7 @@ optimizer = Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.we
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=7, min_lr=args.learning_rate/1000, verbose=False)
 criterion = DiceLoss()
 
-early_stopping = EarlyStopping(patience=args.early_stopping_patience, verbose=False, path = filename)
+early_stopping = EarlyStopping(patience=args.early_stopping_patience, verbose=False, path = filename+'.pt')
 loss_dict = {'train': [], 'val': []}
 # print(f'current learning rate: {args.learning_rate}')
 for epoch in range(args.num_epochs):
