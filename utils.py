@@ -85,7 +85,7 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
     train_data = CustomDataset(train_img, train_mask, transform=transform)
     test_data = CustomDataset(test_img, test_mask, transform=base_transform)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return train_loader, test_loader
