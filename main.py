@@ -72,7 +72,7 @@ folder_name = f'models/{model_path}'
 if not os.path.isdir(folder_name):
     os.mkdir(folder_name)
 
-filename = f'{folder_name}/model.pt'
+filename = f'{folder_name}/model'
 
 # print(model_path)
 # print(filename)
@@ -156,13 +156,15 @@ for epoch in range(args.num_epochs):
             break
 #            scheduler.step(float(val_loss))
         loss_dict['val'].append(valid_loss)
+    if epoch%5==4:
+        torch.save(model.state_dict(), f'{filename}_{epoch}.pt')
             
     print(f'Epoch {epoch} train_loss: {train_loss:0.5f}   val_loss: {valid_loss:0.5f}')
 
 
 # evaluation
 
-model.load_state_dict(torch.load(f'{filename}'))
+model.load_state_dict(torch.load(f'{filename}.pt'))
 DS, JS = evaluate(model, val_loader, mode)
 
 with open(f'{folder_name}/results.txt', 'w') as f:
