@@ -66,9 +66,9 @@ else:
     train_mode = 'pre'
 
 if args.memo is None:
-    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}'
+    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}_{args.learning_rate}'
 else:
-    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}_{args.memo}'
+    model_path = f'{train_mode}_{args.data_type}_{args.augmentation_type}_{args.model_type}_{args.learning_rate}_{args.memo}'
 
 folder_name = f'models/{model_path}'
 if not os.path.isdir(folder_name):
