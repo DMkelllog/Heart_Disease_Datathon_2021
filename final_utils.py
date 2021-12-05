@@ -68,7 +68,7 @@ def make_dataset(data_path, data_type, transform):
     dataset = TestDataset(X_list, y_list, transform = transform)
     return size_dict, dataset
 
-def final_evaluate(model, test_dataset, size_dict, mode='base'):
+def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
     DS_list = []
     JS_list = []
     model.eval()
@@ -78,11 +78,15 @@ def final_evaluate(model, test_dataset, size_dict, mode='base'):
             output = model(img.cuda().float())
 
             if mode=='base': # 일반적인 모델
+                output = ((output > threshold) + 0)
                 pred_mask = resize_return(output, size_dict["cutoff"][i], size_dict["size"][i], 100)
 
             elif mode=='caranet': # 종욱이 모델
+                output = ((output[0] > threshold) + 0)
                 pred_mask = resize_return(output[0], size_dict["cutoff"][i], size_dict["size"][i], 88)
-            pred_mask_hard = ((pred_mask > 0.5) + 0)
+            
+            pred_mask_hard = ((pred_mask > threshold) + 0)
+            
             DS, JS = metrics(pred_mask_hard, gt_mask)
             DS_list.append(DS)
             JS_list.append(JS)
