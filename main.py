@@ -17,12 +17,10 @@ from tqdm import tqdm
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-from augmentation import get_training_augmentation
 
 from utils import *
 
-from models import caranet
-from unet import pretrained_unet
+from models import caranet, pretrained_unet
 
 from metrics import DiceLoss
 import time

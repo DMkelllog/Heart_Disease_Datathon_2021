@@ -9,6 +9,63 @@ from albumentations.pytorch import ToTensorV2
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
+def get_training_augmentation(type=2):
+    
+    if type == 0:
+        train_transform = [
+            ToTensorV2(transpose_mask=True)
+        ]
+
+    if type == 1:
+        train_transform = [
+            A.OneOf(
+                [
+                    A.CLAHE(p=1),
+                    A.RandomBrightness(p=1),
+                    A.RandomContrast(p=1),
+                ],
+                p=0.5,
+            ),
+            A.ShiftScaleRotate(scale_limit=0, rotate_limit=0.1, shift_limit=0.1, p=0.5, border_mode=0),
+            ToTensorV2(transpose_mask=True)
+        ]
+
+    if type == 2:
+        train_transform = [
+             A.OneOf(
+                [
+                    A.CLAHE(p=1),
+                    A.RandomBrightness(p=1),
+                    A.RandomContrast(p=1),
+                ],
+                p=0.5,
+            ),
+            A.HorizontalFlip(),
+            A.Rotate(limit=20),
+            A.ShiftScaleRotate(shift_limit=0.3, scale_limit=0, rotate_limit=0, border_mode=0),
+            ToTensorV2(transpose_mask=True)
+        ]
+
+    if type == 3:
+        train_transform = [
+             A.OneOf(
+                [
+                    A.CLAHE(p=1),
+                    A.RandomBrightness(limit=(-0.05, 0.05), p=1),
+                    A.RandomContrast(limit=(-0.1, 0.1), p=1),
+                ],
+                p=0.5,
+            ),
+            A.Rotate(limit=(-7, 7), border_mode=0),
+            A.ShiftScaleRotate(shift_limit_x=(-0.05, 0.05), shift_limit_y=(-0.05, 0.05), rotate_limit=(0, 0), scale_limit=(-0.1, 0.1), border_mode=0),
+            ToTensorV2(transpose_mask=True),
+        ]
+
+    return A.Compose(train_transform)
+
 class CustomDataset(Dataset):
     def __init__(self, X, y, transform=False):
         
@@ -198,51 +255,3 @@ def evaluate(model, testloader, mode='base'):
     print(f'Dice Similarity:    {DS_mean:0.4f} \nJaccard Similarity: {JS_mean:0.4f}')
     return DS_mean, JS_mean
 
-def final_evaluate(model, test_dataset, size_dict, mode='base'):
-    DS_list = []
-    JS_list = []
-    model.eval()
-    with torch.no_grad():
-        for i, img, gt_mask in enumerate(test_dataset):
-
-            output = model(img.cuda().float())
-
-            if mode=='base': # 일반적인 모델
-                pred_mask = resize_return(output, size_dict["cutoff"][i], size_dict["size"][i], 100)
-
-            elif mode=='caranet': # 종욱이 모델
-                pred_mask = resize_return(output[0], size_dict["cutoff"][i], size_dict["size"][i], 88)
-            pred_mask_hard = ((pred_mask > 0.5) + 0)
-            DS, JS = metrics(pred_mask_hard, gt_mask)
-            DS_list.append(DS)
-            JS_list.append(JS)
-
-    DS_mean = np.mean(DS_list)
-    JS_mean = np.mean(JS_list)
-    print(f'Dice Similarity:    {DS_mean:0.4f} \nJaccard Similarity: {JS_mean:0.4f}')
-    return DS_mean, JS_mean
-
-
-def metrics(pred_mask_hard, gt_mask):
-
-    Inter = np.sum((pred_mask_hard + gt_mask) == 2)
-    DS_Union = np.sum(pred_mask_hard) + np.sum(gt_mask)
-    Union = np.sum((pred_mask_hard + gt_mask) >= 1)
-    DS = (Inter*2) / (DS_Union + 1e-8)
-    JS = Inter/(Union + 1e-8)
-    return DS, JS
-
-
-def resize_return(y_pred, cutoff, originsize, pad_size): ## cutoff, originsize(tuple)
-    h, w = originsize
-    h -= cutoff
-
-    inverse = transforms.Compose([
-                                transforms.Pad(padding=(pad_size, 0), fill=0),
-                                transforms.Resize((h,w), interpolation=InterpolationMode.NEAREST),
-                                transforms.Pad(padding=(0,cutoff,0,0), fill=0)
-                                 ])
-    
-    y_pred_inverse = inverse(y_pred)
-
-    return y_pred_inverse
