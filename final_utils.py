@@ -5,6 +5,8 @@ from torchvision import transforms
 import pickle
 from preprocess import *
 from torch.utils.data import Dataset
+import torch
+
 class TestDataset(Dataset):
     def __init__(self, X, y, transform=False):
         
