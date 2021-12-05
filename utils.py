@@ -255,3 +255,29 @@ def evaluate(model, testloader, mode='base'):
     print(f'Dice Similarity:    {DS_mean:0.4f} \nJaccard Similarity: {JS_mean:0.4f}')
     return DS_mean, JS_mean
 
+def precision_recall(pred_mask_list_hard, gt_mask_list):
+    DS_list = []
+    JS_list = []
+    RC_list = []
+    PC_list = []
+
+    for i, gt_mask in enumerate(gt_mask_list):      
+        Inter = np.sum((pred_mask_list_hard[i] + gt_mask) == 2) ## True positive
+        FN = np.sum(((1-pred_mask_list_hard[i]) + gt_mask) == 2) ## False negative
+        FP = np.sum((pred_mask_list_hard[i] + (1 - gt_mask)) == 2) ## False positive
+        DS_Union = np.sum(pred_mask_list_hard[i]) + np.sum(gt_mask)
+        Union = np.sum((pred_mask_list_hard[i] + gt_mask) >= 1)
+        DS = (Inter*2) / (DS_Union + 1e-8)
+        JS = Inter/(Union + 1e-8)
+        RC = Inter/(Inter + FN + 1e-8) ## Recall
+        PC = Inter/(Inter + FP + 1e-8) ## precision
+        DS_list.append(DS)
+        JS_list.append(JS)
+        RC_list.append(RC)
+        PC_list.append(PC)
+        
+    DS_mean = np.mean(DS_list)
+    JS_mean = np.mean(JS_list)
+    RC_mean = np.mean(RC_list)
+    PC_mean = np.mean(PC_list)
+
