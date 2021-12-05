@@ -35,14 +35,13 @@ def make_dataset(data_path, data_type, transform):
                 # print(img_name)
         if img_name.endswith('.png'):
             img = plt.imread(f'{data_p}/' + img_name)
-            mask = np.load(f'{data_p}/' + img_name.replace('png', 'npy')) * 255
-            h, w = mask.shape[0], mask.shape[1]
-            cutoff, img, mask = remove_topnoise(img, mask)
+            h, w = img.shape[0], img.shape[1]
+            cutoff, img, _ = remove_topnoise(img, mask)
 
             size_dict["size"].append((h,w))
             size_dict["cut_off"].append(cutoff)
 
-            img, mask = resize_crop(img, mask)
+            img, _ = resize_crop(img, mask)
 
             img = img.numpy()
             img = img.transpose(1, 2, 0)
@@ -52,7 +51,7 @@ def make_dataset(data_path, data_type, transform):
             mask = (mask>0.5)+0
             
             plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
-            np.save(f'{data_p}/mask/' + img_name.replace('png', 'npy'), mask)
+            # np.save(f'{data_p}/mask/' + img_name.replace('png', 'npy'), mask)
     
 
     # make pickle
@@ -61,7 +60,8 @@ def make_dataset(data_path, data_type, transform):
 
     for img_name in img_list:
         img = plt.imread(f'{data_p}/img/{img_name}')
-        mask = np.load(f'{data_p}/mask/{img_name[:-4]}.npy')
+        mask = np.load(f'{data_p}/{img_name[:-4]}.npy')
+        # mask = np.load(f'{data_p}/mask/{img_name[:-4]}.npy')
 
         X_list.append(img[:, :, :3])
         y_list.append(mask)
