@@ -5,6 +5,7 @@ from torchvision import transforms
 import pickle
 from preprocess import *
 from torch.utils.data import Dataset
+from torchvision.transforms.functional import InterpolationMode
 import torch
 
 class TestDataset(Dataset):
