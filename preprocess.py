@@ -27,6 +27,8 @@ def resize_crop(img, mask, resize_h=352, resize_w=528, crop_size=88):
 
     return img, mask
 
+
+
 if __name__ == '__main__':
     for mode in ['train', 'validation']:
         for version in ['A2C', 'A4C']:

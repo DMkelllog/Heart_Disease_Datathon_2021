@@ -182,8 +182,6 @@ def evaluate(model, testloader, mode='base'):
     gt_mask_list = np.vstack(gt_mask_list)
     pred_mask_list_hard = ((pred_mask_list > 0.5) + 0)
     # print(gt_mask_list.shape, pred_mask_list_hard.shape)
-    
-
     DS_list = []
     JS_list = []
 
@@ -199,3 +197,52 @@ def evaluate(model, testloader, mode='base'):
     JS_mean = np.mean(JS_list)
     print(f'Dice Similarity:    {DS_mean:0.4f} \nJaccard Similarity: {JS_mean:0.4f}')
     return DS_mean, JS_mean
+
+def final_evaluate(model, test_dataset, size_dict, mode='base'):
+    DS_list = []
+    JS_list = []
+    model.eval()
+    with torch.no_grad():
+        for i, img, gt_mask in enumerate(test_dataset):
+
+            output = model(img.cuda().float())
+
+            if mode=='base': # 일반적인 모델
+                pred_mask = resize_return(output, size_dict["cutoff"][i], size_dict["size"][i], 100)
+
+            elif mode=='caranet': # 종욱이 모델
+                pred_mask = resize_return(output[0], size_dict["cutoff"][i], size_dict["size"][i], 88)
+            pred_mask_hard = ((pred_mask > 0.5) + 0)
+            DS, JS = metrics(pred_mask_hard, gt_mask)
+            DS_list.append(DS)
+            JS_list.append(JS)
+
+    DS_mean = np.mean(DS_list)
+    JS_mean = np.mean(JS_list)
+    print(f'Dice Similarity:    {DS_mean:0.4f} \nJaccard Similarity: {JS_mean:0.4f}')
+    return DS_mean, JS_mean
+
+
+def metrics(pred_mask_hard, gt_mask):
+
+    Inter = np.sum((pred_mask_hard + gt_mask) == 2)
+    DS_Union = np.sum(pred_mask_hard) + np.sum(gt_mask)
+    Union = np.sum((pred_mask_hard + gt_mask) >= 1)
+    DS = (Inter*2) / (DS_Union + 1e-8)
+    JS = Inter/(Union + 1e-8)
+    return DS, JS
+
+
+def resize_return(y_pred, cutoff, originsize, pad_size): ## cutoff, originsize(tuple)
+    h, w = originsize
+    h -= cutoff
+
+    inverse = transforms.Compose([
+                                transforms.Pad(padding=(pad_size, 0), fill=0),
+                                transforms.Resize((h,w), interpolation=InterpolationMode.NEAREST),
+                                transforms.Pad(padding=(0,cutoff,0,0), fill=0)
+                                 ])
+    
+    y_pred_inverse = inverse(y_pred)
+
+    return y_pred_inverse
