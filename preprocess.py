@@ -13,7 +13,7 @@ def remove_topnoise(img, mask=False):
 
 
     cutoff_min = np.min([cutoff1, cutoff2])
-    if mask:
+    if mask is not False:
         return cutoff_min, img[cutoff_min:, ], mask[cutoff_min:, ]
     else:
         return cutoff_min, img[cutoff_min:, ]
@@ -23,7 +23,7 @@ def resize_crop(img, mask=False, resize_h=352, resize_w=528, crop_size=88):
 
     img = resize(img)
     img = img[:, :, crop_size:-crop_size]
-    if mask:
+    if mask is not False:
         mask = resize(mask)
         mask = mask[:, :, crop_size:-crop_size]
         return img, mask
