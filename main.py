@@ -22,7 +22,6 @@ from utils import *
 
 from models import caranet, pretrained_unet
 
-from metrics import DiceLoss
 import time
 
 
@@ -81,8 +80,8 @@ if not os.path.isdir(folder_name):
 
 filename = f'{folder_name}/model'
 
-# print(model_path)
-# print(filename)
+print(model_path)
+print(filename)
 
 augmentation = get_training_augmentation(type=args.augmentation_type)
 
@@ -94,7 +93,7 @@ criterion = DiceLoss()
 
 early_stopping = EarlyStopping(patience=args.early_stopping_patience, verbose=False, path = filename+'.pt')
 loss_dict = {'train': [], 'val': []}
-# print(f'current learning rate: {args.learning_rate}')
+print(f'current learning rate: {args.learning_rate}')
 for epoch in range(args.num_epochs):
     model.train()
     start = time.time()
