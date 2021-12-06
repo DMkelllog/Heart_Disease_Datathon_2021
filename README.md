@@ -24,8 +24,14 @@ mkdir models
 │       ├── A2C
 │       └── A4C
 ├── models
-│   ├── A2C_model.pt
-│   └── A4C_model.pt
+│   ├── A2C_caranet_1.pt
+│   ├── A2C_caranet_2.pth
+│   ├── A2C_unet_1.pth
+│   ├── A2C_unet_2.pth
+│   ├── A4C_caranet_1.pt
+│   ├── A4C_caranet_2.pth
+│   ├── A4C_unet_1.pth
+│   └── A4C_unet_2.pth
 ├── test_predict_mask.py
 ├── final_utils.py
 └── Final_test.py
