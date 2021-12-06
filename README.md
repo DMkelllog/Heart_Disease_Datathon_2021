@@ -8,7 +8,7 @@ mkdir data
 2. 데이터를 data 폴더에 넣는다
 
 ## Model Path 설정
-1. 데이터 폴더를 생성한다.
+1. 모델 폴더를 생성한다.
 ```bash
 mkdir models
 ```
