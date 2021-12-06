@@ -96,21 +96,20 @@ def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
     model.eval()
     with torch.no_grad():
         for i, (img, gt_mask) in enumerate(test_dataset):
-
-            print(img.size)
+            
             output = model(img.cuda().float())
 
             if mode=='base': # 일반적인 모델
                 output = ((output > threshold) + 0)
-                pred_mask = resize_return(output, size_dict["cutoff"][i], size_dict["size"][i], 100)
+                pred_mask = resize_return(output, size_dict["cut_off"][i], size_dict["size"][i], 100)
 
             elif mode=='caranet': # 종욱이 모델
                 output = ((output[0] > threshold) + 0)
-                pred_mask = resize_return(output[0], size_dict["cutoff"][i], size_dict["size"][i], 88)
+                pred_mask = resize_return(output[0], size_dict["cut_off"][i], size_dict["size"][i], 88)
             
             pred_mask_hard = ((pred_mask > threshold) + 0)
             
-            DS, JS = metrics(pred_mask_hard, gt_mask)
+            DS, JS = metrics(pred_mask_hard.cpu().numpy(), gt_mask.numpy())
             DS_list.append(DS)
             JS_list.append(JS)
 

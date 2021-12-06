@@ -16,6 +16,7 @@ from albumentations.pytorch import ToTensorV2
 
 from utils import *
 
+from torch.utils.data import DataLoader
 from models import caranet, pretrained_unet
 
 import time
@@ -30,7 +31,7 @@ from final_utils import *
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--data_path', type=str, default="")
-parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C', 'both'], default='both')
+parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C'], default='A2C')
 
 parser.add_argument('--model_type', type=str, default='unet')
 parser.add_argument('--pretrained_path', type=str)
@@ -43,6 +44,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 transform = ToTensorV2()
 
 size_dict, dataset = make_test_dataset(args.data_path, args.data_type, transform)
+data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 #data (TTA에 따라 달라짐)
 #model (ensemble??)
@@ -57,4 +59,4 @@ elif args.model_type == 'caranet':
 model.load_state_dict(torch.load(args.pretrained_path))
 # train_mode = f'{args.pretrained_path}_fine'
 
-final_evaluate(model, dataset, size_dict, mode)
+final_evaluate(model, data_loader, size_dict, 0.5, mode)
