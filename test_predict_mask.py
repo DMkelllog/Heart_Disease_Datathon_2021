@@ -93,7 +93,7 @@ parser.add_argument('--data_path', type=str, default="data/echocardiography/test
 parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C'], default='A2C')
 
 parser.add_argument('--model_type', type=str, default='unet')
-parser.add_argument('--pretrained_path', type=str)
+parser.add_argument('--pretrained_path', type=str, help='pretrained model path txt file')
 parser.add_argument('--memo', type=str)
 
 args = parser.parse_args()
@@ -133,10 +133,16 @@ elif args.model_type == 'caranet':
     mode = 'caranet'
     pad_size = 88
 
-# Predict mask
+# Ensemble to be updated...
+
+
+
+# Load model
 model_path = 'pre_both_3_caranet_0.001_fine_A4C_3_caranet_0.0001_9'
 path = f'models/{model_path}/model.pt'
 model.load_state_dict(torch.load(path))
+
+# Predict mask
 predicted_masks = []
 model.eval()
 with torch.no_grad():
@@ -152,7 +158,7 @@ with torch.no_grad():
         predicted_masks.append(output_binary)
 predicted_masks = torch.vstack(predicted_masks)
 
-# Ensemble to be updated...
+
 
 
 # Save predicted masks
