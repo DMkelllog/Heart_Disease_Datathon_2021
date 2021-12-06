@@ -89,8 +89,8 @@ transform = A.pytorch.ToTensorV2()
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--data_path', type=str, default="")
-parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C', 'both'], default='both')
+parser.add_argument('--data_path', type=str, default="data/echocardiography/test")
+parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C'], default='A2C')
 
 parser.add_argument('--model_type', type=str, default='unet')
 parser.add_argument('--pretrained_path', type=str)
@@ -99,22 +99,6 @@ parser.add_argument('--memo', type=str)
 args = parser.parse_args()
 
 threshold = 0.5
-
-# Load data
-test_path = 'data/'
-args.data_path = 'data/echocardiography/validation'
-args.data_type = 'A2C'
-
-# Select model
-if args.model_type == 'unet':
-    model = pretrained_unet(pretrained_path=args.pretrained_path).to(device)
-    mode = 'base'
-    pad_size = 100
-
-elif args.model_type == 'caranet':
-    model = caranet(pretrained_path=args.pretrained_path).to(device)
-    mode = 'caranet'
-    pad_size = 88
 
 # Load and preprocess raw test images
 d_path = os.path.join(args.data_path, args.data_type)
@@ -138,6 +122,16 @@ assert X_test[0].min() ==0  and X_test[0].max() <= 1
 dataset_test = TestDataset(X_test, transform = transform)
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=0)
 
+# Select model
+if args.model_type == 'unet':
+    model = pretrained_unet(pretrained_path=args.pretrained_path).to(device)
+    mode = 'base'
+    pad_size = 100
+
+elif args.model_type == 'caranet':
+    model = caranet(pretrained_path=args.pretrained_path).to(device)
+    mode = 'caranet'
+    pad_size = 88
 
 # Predict mask
 model_path = 'pre_both_3_caranet_0.001_fine_A4C_3_caranet_0.0001_9'
