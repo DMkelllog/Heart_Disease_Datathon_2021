@@ -39,10 +39,10 @@ mkdir models
 ## How To Use
 - For A2C task
 ```bash
-python Final_test.py --data_path "data/test" --data_type "A2C" --pretrained_path "models/A2C_model.pt"
+python Final_test.py --data_path "data/test" --data_type "A2C" --pretrained_path "models"
 ```
 
 - For A4C task
 ```bash
-python Final_test.py --data_path "data/test" --data_type "A4C" --pretrained_path "models/A4C_model.pt"
+python Final_test.py --data_path "data/test" --data_type "A4C" --pretrained_path "models"
 ```
