@@ -54,7 +54,7 @@ def resize_crop(img, mask=False, resize_h=352, resize_w=528, crop_size=88):
         return img
 
 
-def make_test_dataset(data_path, data_type, transform):
+def make_test_dataset(data_path, data_type, transform, mode='caranet'):
     data_p = f'{data_path}/{data_type}'
     img_list = sorted(os.listdir(data_p))
     size_dict = {"size":[], "cut_off":[]}
@@ -67,8 +67,11 @@ def make_test_dataset(data_path, data_type, transform):
 
             size_dict["size"].append((h,w))
             size_dict["cut_off"].append(cutoff)
+            if mode == 'caranet':
+                img = resize_crop(img)
+            else:
+                img = resize_crop(img, resize_h=400, resize_w=600, crop_size=100)
 
-            img = resize_crop(img)
 
             img = img.numpy()
             img = img.transpose(1, 2, 0)
@@ -99,7 +102,7 @@ def TTA_caranet(image, output, model, num):
     train_transform = A.Compose([
             A.OneOf(
                 [
-                    A.RandomContrast(p=1),
+                    A.RandomContrast(p=1, ),
                 ],
                 p=1,
             ),
@@ -131,14 +134,7 @@ def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
                 pred_mask = resize_return(output, size_dict["cut_off"][i], size_dict["size"][i], 100)
 
             elif mode=='caranet': # 종욱이 모델
-                #output = ((output[0].sigmoid()> threshold) + 0)
-                #print(TTA_caranet(img, output, model, 5).shape)
                 output2 = torch.Tensor((TTA_caranet(img, output[0], model, 30)>threshold)+0)
-                #print(output.shape)
-                #print(output2.shape)
-                #print(gt_mask.shape)
-                #break
-                
                 pred_mask = resize_return(output2.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 88)
             
             pred_mask_hard = ((pred_mask > threshold) + 0)

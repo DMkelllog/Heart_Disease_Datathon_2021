@@ -25,24 +25,24 @@ mkdir models
 │       └── A4C
 ├── models
 │   ├── A2C_caranet_1.pt
-│   ├── A2C_caranet_2.pth
-│   ├── A2C_unet_1.pth
-│   ├── A2C_unet_2.pth
+│   ├── A2C_caranet_2.pt
+│   ├── A2C_unet_1.pt
+│   ├── A2C_unet_2.pt
 │   ├── A4C_caranet_1.pt
-│   ├── A4C_caranet_2.pth
-│   ├── A4C_unet_1.pth
-│   └── A4C_unet_2.pth
+│   ├── A4C_caranet_2.pt
+│   ├── A4C_unet_1.pt
+│   └── A4C_unet_2.pt
 ├── test_predict_mask.py
 ├── final_utils.py
-└── Final_test.py
+└── final_test.py
 ``` 
 ## How To Use
 - For A2C task
 ```bash
-python Final_test.py --data_path "data/test" --data_type "A2C" --pretrained_path "models"
+python final_test.py --data_path "data/test" --data_type "A2C" 
 ```
 
 - For A4C task
 ```bash
-python Final_test.py --data_path "data/test" --data_type "A4C" --pretrained_path "models"
+python final_test.py --data_path "data/test" --data_type "A4C"
 ```

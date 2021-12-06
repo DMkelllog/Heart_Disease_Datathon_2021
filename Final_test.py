@@ -41,9 +41,16 @@ args = parser.parse_args()
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-transform = ToTensorV2()
+base_transform = ToTensorV2()
 
-size_dict, dataset = make_test_dataset(args.data_path, args.data_type, transform)
+tta_transform = A.Compose([
+            A.RandomContrast(p=1),
+            ToTensorV2(transpose_mask=True)
+            ])
+
+size_dict, dataset = make_test_dataset(args.data_path, args.data_type, base_transform)
+size_dict, dataset_tta = make_test_dataset_tta(args.data_path, args.data_type, tta_transform)
+
 data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 #data (TTA에 따라 달라짐)
