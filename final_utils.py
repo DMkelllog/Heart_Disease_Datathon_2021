@@ -3,10 +3,10 @@ import numpy as np
 import os
 from torchvision import transforms
 import pickle
-from preprocess import *
 from torch.utils.data import Dataset
-from torchvision.transforms.functional import InterpolationMode
 import torch
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 class TestDataset(Dataset):
     def __init__(self, X, y, transform=False):
@@ -27,29 +27,31 @@ class TestDataset(Dataset):
     def __len__(self):
         return len(self.X)
 
-# def make_dataset(data_path, data_type, transform):
-#     data_p = f'{data_path}/{data_type}'
-#     img_list = sorted(os.listdir(data_p))
-#     size_dict = {"size":[], "cut_off":[]}
-#     for img_name in img_list:
-#         # print(img_name)
-#         if img_name.endswith('.png'):
-#             img = plt.imread(f'{data_p}/' + img_name)
-#             mask = np.load(f'{data_p}/' + img_name.replace('png', 'npy'))
+def remove_topnoise(img, mask=False):
+    cand1 = int(img.shape[1] / 8 * 7)
+    cand2 = int(img.shape[1] / 8 * 6)
 
-#             h, w = img.shape[0], img.shape[1]
-#             cutoff, img, _ = remove_topnoise(img, mask)
+    cutoff1 = np.where(img[:, cand1, :] < 0.01)[0][0]
+    cutoff2 = np.where(img[:, cand2, :] < 0.01)[0][0]
 
-#             size_dict["size"].append((h,w))
-#             size_dict["cut_off"].append(cutoff)
 
-#             img, _ = resize_crop(img, mask)
+    cutoff_min = np.min([cutoff1, cutoff2])
+    if mask is not False:
+        return cutoff_min, img[cutoff_min:, ], mask[cutoff_min:, ]
+    else:
+        return cutoff_min, img[cutoff_min:, ]
+    
+def resize_crop(img, mask=False, resize_h=352, resize_w=528, crop_size=88):
+    resize = transforms.Compose([transforms.ToTensor(), transforms.Resize((resize_h, resize_w))])
 
-#             img = img.numpy()
-#             img = img.transpose(1, 2, 0)
-            
-#             os.makedirs(f'{data_p}/img/', exist_ok=True)
-#             plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
+    img = resize(img)
+    img = img[:, :, crop_size:-crop_size]
+    if mask is not False:
+        mask = resize(mask)
+        mask = mask[:, :, crop_size:-crop_size]
+        return img, mask
+    else:
+        return img
 
 
 def make_test_dataset(data_path, data_type, transform):
@@ -90,6 +92,30 @@ def make_test_dataset(data_path, data_type, transform):
     dataset = TestDataset(X_list, y_list, transform=transform)
     return size_dict, dataset
 
+def TTA_caranet(image, output, model, num):
+    img_list = []
+    pred_mask_list = []
+  
+    train_transform = A.Compose([
+            A.OneOf(
+                [
+                    A.RandomContrast(p=1),
+                ],
+                p=1,
+            ),
+            ToTensorV2(transpose_mask=True)
+    ])
+    predict = output.cpu().sigmoid().numpy()
+    for i in range(num):
+        b = train_transform(image = np.array(image.squeeze().permute(1,2,0)))
+ 
+        sub_predict = model(b["image"].view(1,3,352,352).float().cuda())
+        predict = predict + sub_predict[0].sigmoid().cpu().numpy()
+    
+    mean_predict = predict/(num+1)
+    
+    return mean_predict
+
 def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
     DS_list = []
     JS_list = []
@@ -98,14 +124,22 @@ def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
         for i, (img, gt_mask) in enumerate(test_dataset):
             
             output = model(img.cuda().float())
+            #print(output[0].shape)
 
             if mode=='base': # 일반적인 모델
                 output = ((output > threshold) + 0)
                 pred_mask = resize_return(output, size_dict["cut_off"][i], size_dict["size"][i], 100)
 
             elif mode=='caranet': # 종욱이 모델
-                output = ((output[0] > threshold) + 0)
-                pred_mask = resize_return(output[0], size_dict["cut_off"][i], size_dict["size"][i], 88)
+                #output = ((output[0].sigmoid()> threshold) + 0)
+                #print(TTA_caranet(img, output, model, 5).shape)
+                output2 = torch.Tensor((TTA_caranet(img, output[0], model, 30)>threshold)+0)
+                #print(output.shape)
+                #print(output2.shape)
+                #print(gt_mask.shape)
+                #break
+                
+                pred_mask = resize_return(output2.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 88)
             
             pred_mask_hard = ((pred_mask > threshold) + 0)
             
@@ -135,7 +169,7 @@ def resize_return(y_pred, cutoff, originsize, pad_size): ## cutoff, originsize(t
 
     inverse = transforms.Compose([
                                 transforms.Pad(padding=(pad_size, 0), fill=0),
-                                transforms.Resize((h,w), interpolation=InterpolationMode.NEAREST),
+                                transforms.Resize((h,w)),
                                 transforms.Pad(padding=(0,cutoff,0,0), fill=0)
                                  ])
     

@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data_path', type=str, default="")
 parser.add_argument('--data_type', type=str, choices=['A2C', 'A4C'], default='A2C')
 
-parser.add_argument('--model_type', type=str, default='unet')
+parser.add_argument('--model_type', type=str, default='caranet')
 parser.add_argument('--pretrained_path', type=str)
 parser.add_argument('--memo', type=str)
 
