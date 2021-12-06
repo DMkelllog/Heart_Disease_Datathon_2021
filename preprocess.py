@@ -4,7 +4,7 @@ import os
 from torchvision import transforms
 import pickle
 
-def remove_topnoise(img, mask):
+def remove_topnoise(img, mask=False):
     cand1 = int(img.shape[1] / 8 * 7)
     cand2 = int(img.shape[1] / 8 * 6)
 
@@ -13,19 +13,22 @@ def remove_topnoise(img, mask):
 
 
     cutoff_min = np.min([cutoff1, cutoff2])
-
-    return cutoff_min, img[cutoff_min:, ], mask[cutoff_min:, ] 
-
-def resize_crop(img, mask, resize_h=352, resize_w=528, crop_size=88):
+    if mask:
+        return cutoff_min, img[cutoff_min:, ], mask[cutoff_min:, ]
+    else:
+        return cutoff_min, img[cutoff_min:, ]
+    
+def resize_crop(img, mask=False, resize_h=352, resize_w=528, crop_size=88):
     resize = transforms.Compose([transforms.ToTensor(), transforms.Resize((resize_h, resize_w))])
 
     img = resize(img)
-    mask = resize(mask)
-
     img = img[:, :, crop_size:-crop_size]
-    mask = mask[:, :, crop_size:-crop_size]
-
-    return img, mask
+    if mask:
+        mask = resize(mask)
+        mask = mask[:, :, crop_size:-crop_size]
+        return img, mask
+    else:
+        return img
 
 
 

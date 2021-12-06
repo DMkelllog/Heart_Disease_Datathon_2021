@@ -37,7 +37,7 @@ def make_dataset(data_path, data_type, transform):
         if img_name.endswith('.png'):
             img = plt.imread(f'{data_p}/' + img_name)
             h, w = img.shape[0], img.shape[1]
-            cutoff, img, _ = remove_topnoise(img, mask)
+            cutoff, img, _ = remove_topnoise(img)
 
             size_dict["size"].append((h,w))
             size_dict["cut_off"].append(cutoff)
@@ -46,12 +46,33 @@ def make_dataset(data_path, data_type, transform):
 
             img = img.numpy()
             img = img.transpose(1, 2, 0)
-
             mask = mask.numpy()
             mask = mask.transpose(1, 2, 0)
             mask = (mask>0.5)+0
             
             plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
+
+def make_test_dataset(data_path, data_type, transform):
+    data_p = f'{data_path}/{data_type}'
+    img_list = sorted(os.listdir(data_p))
+    size_dict = {"size":[], "cut_off":[]}
+    for img_name in img_list:
+                # print(img_name)
+        if img_name.endswith('.png'):
+            img = plt.imread(f'{data_p}/' + img_name)
+            h, w = img.shape[0], img.shape[1]
+            cutoff, img = remove_topnoise(img)
+
+            size_dict["size"].append((h,w))
+            size_dict["cut_off"].append(cutoff)
+
+            img = resize_crop(img)
+
+            img = img.numpy()
+            img = img.transpose(1, 2, 0)
+            
+            os.makedirs(f'{data_p}/img/', exist_ok=True)
+            plt.imsave(f'{data_p}/' + img_name, img[:,:,:3])
             # np.save(f'{data_p}/mask/' + img_name.replace('png', 'npy'), mask)
     
 

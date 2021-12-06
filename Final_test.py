@@ -22,6 +22,11 @@ import time
 
 from final_utils import *
 
+# Input: test set images, trained model
+# Output: prediction on test set
+# Functions: Resize, TTA, Ensemble
+
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--learning_rate', type=float, default=1e-3)
@@ -63,6 +68,6 @@ if args.pretrained_path is not None:
     else:
         path = f'models/{args.pretrained_path}/model_{args.pretrained_epoch}.pt'
     model.load_state_dict(torch.load(path))
-    train_mode = f'{args.pretrained_path}_fine'
+    # train_mode = f'{args.pretrained_path}_fine'
 
 final_evaluate(model, dataset, size_dict, mode)
