@@ -10,7 +10,6 @@ import torch
 
 class TestDataset(Dataset):
     def __init__(self, X, y, transform=False):
-        
         self.X = X
         self.y = y
 
@@ -21,43 +20,44 @@ class TestDataset(Dataset):
         img = (img*255).astype(np.uint8)
 
         if self.transform:
-            transformed = self.transform(image=img, mask=mask)
+            transformed = self.transform(image=img)
             img = transformed['image']
         return img, mask
 
     def __len__(self):
         return len(self.X)
 
-def make_dataset(data_path, data_type, transform):
-    data_p = f'{data_path}/{data_type}'
-    img_list = sorted(os.listdir(data_p))
-    size_dict = {"size":[], "cut_off":[]}
-    for img_name in img_list:
-                # print(img_name)
-        if img_name.endswith('.png'):
-            img = plt.imread(f'{data_p}/' + img_name)
-            h, w = img.shape[0], img.shape[1]
-            cutoff, img, _ = remove_topnoise(img)
+# def make_dataset(data_path, data_type, transform):
+#     data_p = f'{data_path}/{data_type}'
+#     img_list = sorted(os.listdir(data_p))
+#     size_dict = {"size":[], "cut_off":[]}
+#     for img_name in img_list:
+#         # print(img_name)
+#         if img_name.endswith('.png'):
+#             img = plt.imread(f'{data_p}/' + img_name)
+#             mask = np.load(f'{data_p}/' + img_name.replace('png', 'npy'))
 
-            size_dict["size"].append((h,w))
-            size_dict["cut_off"].append(cutoff)
+#             h, w = img.shape[0], img.shape[1]
+#             cutoff, img, _ = remove_topnoise(img, mask)
 
-            img, _ = resize_crop(img, mask)
+#             size_dict["size"].append((h,w))
+#             size_dict["cut_off"].append(cutoff)
 
-            img = img.numpy()
-            img = img.transpose(1, 2, 0)
-            mask = mask.numpy()
-            mask = mask.transpose(1, 2, 0)
-            mask = (mask>0.5)+0
+#             img, _ = resize_crop(img, mask)
+
+#             img = img.numpy()
+#             img = img.transpose(1, 2, 0)
             
-            plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
+#             os.makedirs(f'{data_p}/img/', exist_ok=True)
+#             plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
+
 
 def make_test_dataset(data_path, data_type, transform):
     data_p = f'{data_path}/{data_type}'
     img_list = sorted(os.listdir(data_p))
     size_dict = {"size":[], "cut_off":[]}
     for img_name in img_list:
-                # print(img_name)
+        # print(img_name)
         if img_name.endswith('.png'):
             img = plt.imread(f'{data_p}/' + img_name)
             h, w = img.shape[0], img.shape[1]
@@ -72,22 +72,22 @@ def make_test_dataset(data_path, data_type, transform):
             img = img.transpose(1, 2, 0)
             
             os.makedirs(f'{data_p}/img/', exist_ok=True)
-            plt.imsave(f'{data_p}/' + img_name, img[:,:,:3])
+            plt.imsave(f'{data_p}/img/' + img_name, img[:,:,:3])
             # np.save(f'{data_p}/mask/' + img_name.replace('png', 'npy'), mask)
     
 
     # make pickle
-
+    X_list=[]
+    y_list=[]
     img_list = sorted(os.listdir(f'{data_p}/img/'))
 
     for img_name in img_list:
         img = plt.imread(f'{data_p}/img/{img_name}')
-        mask = np.load(f'{data_p}/{img_name[:-4]}.npy')
-        # mask = np.load(f'{data_p}/mask/{img_name[:-4]}.npy')
-
+        mask = np.load(f"{data_p}/{img_name.replace('png','npy')}")
         X_list.append(img[:, :, :3])
         y_list.append(mask)
-    dataset = TestDataset(X_list, y_list, transform = transform)
+
+    dataset = TestDataset(X_list, y_list, transform=transform)
     return size_dict, dataset
 
 def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
@@ -95,8 +95,9 @@ def final_evaluate(model, test_dataset, size_dict, threshold=0.5, mode='base'):
     JS_list = []
     model.eval()
     with torch.no_grad():
-        for i, img, gt_mask in enumerate(test_dataset):
+        for i, (img, gt_mask) in enumerate(test_dataset):
 
+            print(img.size)
             output = model(img.cuda().float())
 
             if mode=='base': # 일반적인 모델
