@@ -99,8 +99,62 @@ parser.add_argument('--memo', type=str)
 args = parser.parse_args()
 
 threshold = 0.5
+ensemble_list = []
 
-# Load and preprocess raw test images
+################################ Unet ###############################################
+d_path = os.path.join(args.data_path, args.data_type)
+img_list = sorted(os.listdir(d_path))
+X_test = []
+size_dict = {"size":[], "cut_off":[]}
+for img_name in img_list:
+    if img_name.endswith('.png'):
+        img = plt.imread(d_path + '/' + img_name)
+        h, w = img.shape[0], img.shape[1]
+        cutoff, img = remove_topnoise(img)
+        img = resize_crop(img, mask=False, resize_h=400, resize_w=600, crop_size=100)
+        img = img.numpy().transpose(1, 2, 0)
+        X_test.append(img[:, :, :3])
+        size_dict["size"].append((h,w))
+        size_dict["cut_off"].append(cutoff)
+        
+dataset_test = TestDataset(X_test, transform = transform)
+dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=0)
+
+model = pretrained_unet(False).to(device)
+mode = 'base'
+pad_size = 100
+
+for i in range(2):
+    print('unet ', i+1)
+    path = f'models/{args.data_type}/unet_{i+1}.pt'
+    model.load_state_dict(torch.load(path))
+
+    # Predict mask
+    predicted_masks = []
+    model.eval()
+    with torch.no_grad():
+        for i, img in enumerate(dataloader_test):
+            output = model(img.cuda().float())
+            if mode == 'base': 
+                # unet
+                output_binary = ((output > threshold) + 0).cpu()
+            else: 
+                # caranet
+                output_binary = ((output[0].sigmoid() > threshold) + 0).cpu()
+            predicted_masks.append(output_binary)
+    predicted_masks = torch.vstack(predicted_masks)
+
+    y_inverse_list = []
+    for i, mask_pred in enumerate(predicted_masks):
+        y_inverse = resize_return(mask_pred, size_dict["cut_off"][i], size_dict["size"][i], pad_size)
+        y_predicted = y_inverse.squeeze().numpy()
+        y_inverse_list.append(y_inverse.squeeze().numpy())
+    ensemble_list.append(y_inverse_list)
+#####################################################################################
+
+
+################################ caranet ############################################
+
 d_path = os.path.join(args.data_path, args.data_type)
 img_list = sorted(os.listdir(d_path))
 X_test = []
@@ -115,32 +169,18 @@ for img_name in img_list:
         X_test.append(img[:, :, :3])
         size_dict["size"].append((h,w))
         size_dict["cut_off"].append(cutoff)
-
-assert X_test[0].min() ==0  and X_test[0].max() <= 1
-
-# Create test loader
+        
 dataset_test = TestDataset(X_test, transform = transform)
 dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, num_workers=0)
 
-# Select model
-if args.model_type == 'unet':
-    model = pretrained_unet(pretrained_path=args.pretrained_path).to(device)
-    mode = 'base'
-    pad_size = 100
+model = caranet().to(device)
+mode = 'caranet'
+pad_size = 88
 
-elif args.model_type == 'caranet':
-    model = caranet(pretrained_path=args.pretrained_path).to(device)
-    mode = 'caranet'
-    pad_size = 88
-
-# Ensemble
-
-# Load model
-model_path_list = ['pre_both_3_caranet_0.001_fine_A4C_3_caranet_0.0001_9', 'pre_both_3_caranet_0.001_fine_A4C_3_caranet_0.0001_4']
-ensemble_list = []
-for model_path in model_path_list:
-    path = f'models/{model_path}/model.pt'
-    model.load_state_dict(torch.load(path)) 
+for i in range(2):
+    print('caranet ', i+1)
+    path = f'models/{args.data_type}/caranet_{i+1}.pt'
+    model.load_state_dict(torch.load(path))
 
     # Predict mask
     predicted_masks = []
@@ -150,7 +190,6 @@ for model_path in model_path_list:
             output = model(img.cuda().float())
             if mode == 'base': 
                 # unet
-                output = output[0]
                 output_binary = ((output > threshold) + 0).cpu()
             else: 
                 # caranet
@@ -164,13 +203,14 @@ for model_path in model_path_list:
         y_predicted = y_inverse.squeeze().numpy()
         y_inverse_list.append(y_inverse.squeeze().numpy())
     ensemble_list.append(y_inverse_list)
+#####################################################################################
 
 ensemble_list = np.vstack(ensemble_list)
 ensemble_list = np.mean(ensemble_list, axis=0)
-ensemble_list = np.array([(ensemble > 0.5) + 0 for ensemble in ensemble_list])
+ensemble_list = [(ensemble > 0.5) + 0 for ensemble in ensemble_list]
 
 # Save predicted masks
 test_mask_filenames = [npy_file.replace('png','npy') for npy_file in img_list if npy_file.endswith('.png')]
 
 for i, mask_pred in enumerate(ensemble_list):
-    np.save(d_path + '/' + test_mask_filenames[i], mask_pred)
+    np.save(d_path + '/test/' + test_mask_filenames[i], mask_pred)
