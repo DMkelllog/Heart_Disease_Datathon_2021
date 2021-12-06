@@ -1,7 +1,12 @@
 # Heart_Disease_Datathon_2021
 
-## 데이터 준비
+## How To Use
+- For A2C task
+```bash
+python Final_test.py --data_path [data_path] --data_type "A2C" --pretrained_path "A2C_model_path"
+```
 
-1. data 폴더 생성 (Heart_Disease_Datathon_2021/data)
-2. echocardiography 폴더를 data 폴더로 이동
-3. echocardiography 폴더를 original로 이름 변경
+- For A4C task
+```bash
+python Final_test.py --data_path [data_path] --data_type "A4C" --pretrained_path "A4C_model_path"
+```
