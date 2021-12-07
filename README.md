@@ -5,8 +5,7 @@
 https://hdaidatathon.com/  
 https://github.com/DatathonInfo/H.D.A.I.2021  
 
-## Task: 심장 초음파 영상 좌심실 영역 분할
-### 주제1.  
+## Task: 심장 초음파 영상 좌심실 영역 분할  
 * 심초음파 데이터셋을 활용한 좌심실 분할 AI모델
 * Apical 2 chamber(A2C) & Apical 4 chamber(A4C) view 이미지를 활용해 좌심실 분할하는 딥러닝 모델 개발
 ## Team: 🫀리슨투마핫빝
