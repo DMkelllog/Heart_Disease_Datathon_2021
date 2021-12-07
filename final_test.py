@@ -34,8 +34,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 base_transform = ToTensorV2()
 
 tta_transform = A.Compose([
-            # A.RandomContrast(limit=0, p=1),
-            ToTensorV2(transpose_mask=True)
+            A.RandomContrast(limit=0.1, p=1),
+            ToTensorV2(transpose_mask=False)
             ])
 
 threshold = 0.5
@@ -51,36 +51,36 @@ size_dict, dataset_tta = make_test_dataset(args.data_path, args.data_type, tta_t
 data_loader_base = DataLoader(dataset, batch_size=1, shuffle=False)
 data_loader_tta = DataLoader(dataset_tta, batch_size=1, shuffle=False)
 
-# for m in range(2):
-#     print('unet:', m+1)
+for m in range(2):
+    print('unet:', m+1)
 
-#     model = pretrained_unet(False).to(device)
-#     model.load_state_dict(torch.load(f'models/{args.data_type}_unet_{m+1}.pt'))
-#     total_list =  []
-#     model.eval()
-#     with torch.no_grad():
-#         pred_list = []
-#         for i, (img, gt_mask) in enumerate(data_loader_base):
-#             output = model(img.cuda().float())
-#             predict = ((output > threshold) + 0)
-#             predict = resize_return(predict.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 100).squeeze().cpu().numpy()
-#             pred_list.append(predict)
-#             gt_mask_list.append(gt_mask.squeeze(0).cpu().numpy())
+    model = pretrained_unet(False).to(device)
+    model.load_state_dict(torch.load(f'models/{args.data_type}_unet_{m+1}.pt'))
+    total_list =  []
+    model.eval()
+    with torch.no_grad():
+        pred_list = []
+        for i, (img, gt_mask) in enumerate(data_loader_base):
+            output = model(img.cuda().float())
+            predict = ((output > threshold) + 0)
+            predict = resize_return(predict.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 100).squeeze().cpu().numpy()
+            pred_list.append(predict)
+            gt_mask_list.append(gt_mask.squeeze(0).cpu().numpy())
 
-#         total_list.append(pred_list)
+        total_list.append(pred_list)
 
-#         for k in range(num_tta):
-#             pred_list = []
-#             for i, (img, gt_mask) in enumerate(data_loader_tta):
-#                 output = model(img.cuda().float())
-#                 predict = ((output > threshold) + 0)
-#                 predict = resize_return(predict.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 100).squeeze().cpu().numpy()
-#                 pred_list.append(predict)
-#             total_list.append(pred_list)
-#     total_list = np.mean(np.vstack(total_list), axis=0)
-#     total_list = [(a>threshold)+0 for a in total_list]
-#     assert np.sum((total_list[0] > 0) & (total_list[0]<1)) == 0
-#     ensemble_list.append(total_list)
+        for k in range(num_tta):
+            pred_list = []
+            for i, (img, gt_mask) in enumerate(data_loader_tta):
+                output = model(img.cuda().float())
+                predict = ((output > threshold) + 0)
+                predict = resize_return(predict.squeeze(0), size_dict["cut_off"][i], size_dict["size"][i], 100).squeeze().cpu().numpy()
+                pred_list.append(predict)
+            total_list.append(pred_list)
+    total_list = np.mean(np.vstack(total_list), axis=0)
+    total_list = [(a>threshold)+0 for a in total_list]
+    # assert np.sum((total_list[0] > 0) & (total_list[0]<1)) == 0
+    ensemble_list.append(total_list)
 
 size_dict, dataset = make_test_dataset(args.data_path, args.data_type, base_transform)
 size_dict, dataset_tta = make_test_dataset(args.data_path, args.data_type, tta_transform)

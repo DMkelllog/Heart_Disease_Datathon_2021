@@ -42,7 +42,11 @@ mkdir models
 ├── test_predict_mask.py
 ├── final_utils.py
 ├── final_test.py
-└── utils.py
+├── utils.py
+├── preprocess.py
+├── main.py
+└── train.sh
+
 ``` 
 # Validation Evalutation
 

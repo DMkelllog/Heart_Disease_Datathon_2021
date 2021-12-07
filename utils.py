@@ -119,22 +119,18 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
 
     if data_type != 'both':
         if data_type == 'A2C' or data_type == 'A4C':
-            load_dir = ''
-
-            with open(f'data/{load_dir}/validation_{data_type[:3]}{filename}.pickle', 'rb') as f:
+            with open(f'data/validation_{data_type[:3]}{filename}.pickle', 'rb') as f:
                 test_img, test_mask = pickle.load(f)
 
-        with open(f'data/{load_dir}/train_{data_type[:3]}{filename}.pickle', 'rb') as f:
+        with open(f'data/train_{data_type[:3]}{filename}.pickle', 'rb') as f:
             train_img, train_mask = pickle.load(f)
 
     else:
         if data_type == 'both':
-            load_dir = ''
-
             both_ts_img, both_ts_mask = [], []
             
             for version in ['A2C', 'A4C']:
-                with open(f'data/{load_dir}/validation_{version}{filename}.pickle', 'rb') as f:
+                with open(f'data/validation_{version}{filename}.pickle', 'rb') as f:
                     test_img, test_mask = pickle.load(f)
                     both_ts_img.extend(test_img)
                     both_ts_mask.extend(test_mask)
@@ -145,7 +141,7 @@ def make_dataloader(data_type, transform, random_seed=42, batch_size=16, mode='b
         both_tr_img, both_tr_mask = [], []
 
         for version in ['A2C', 'A4C']:
-            with open(f'data/{load_dir}/train_{version}{filename}.pickle', 'rb') as f:
+            with open(f'data/train_{version}{filename}.pickle', 'rb') as f:
                 train_img, train_mask = pickle.load(f)
                 both_tr_img.extend(train_img)
                 both_tr_mask.extend(train_mask)

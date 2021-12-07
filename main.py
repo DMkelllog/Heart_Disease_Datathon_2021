@@ -10,10 +10,8 @@ import torch
 
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch import optim
 import numpy as np
 import pickle
-from tqdm import tqdm
 
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
