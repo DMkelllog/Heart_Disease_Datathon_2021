@@ -1,4 +1,5 @@
 # Heart_Disease_Datathon_2021
+https://github.com/DMkelllog/Heart_Disease_Datathon_2021
 
 ## Task: 심장 초음파 영상 좌심실 영역 분할
 ## Team: 리슨투마핫빝
