@@ -1,9 +1,9 @@
 # HEART DISEASE AI DATATHON 2021
 
-주최: 과학기술정보통신부, 한국지능정보사회진흥원  
-주관: 서울대학교병원, 연세대학교 산학협력단  
 https://hdaidatathon.com/  
 https://github.com/DatathonInfo/H.D.A.I.2021  
+주최: 과학기술정보통신부, 한국지능정보사회진흥원  
+주관: 서울대학교병원, 연세대학교 산학협력단  
 
 ## Task: 심장 초음파 영상 좌심실 영역 분할  
 * 심초음파 데이터셋을 활용한 좌심실 분할 AI모델
