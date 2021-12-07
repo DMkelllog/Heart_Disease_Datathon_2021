@@ -7,7 +7,7 @@ import argparse
 
 # argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--mode', type=str, default='base')
+parser.add_argument('--mode', type=str, choices=['base', 'caranet'], default='base', required=True)
 args = parser.parse_args()
 
 
