@@ -1,5 +1,11 @@
 # Heart_Disease_Datathon_2021
 
+## Dependencies ##
+* python 3.7.11
+* pytorch 1.9.1
+* torchvision 0.10.1
+* albumentations 1.1.0
+
 ## Data Path 설정
 1. 데이터 폴더를 생성한다.
 ```bash
@@ -20,8 +26,8 @@ mkdir models
 │   ├── validation
 │   │   ├── A2C
 │   │   └── A4C
-│   └── test
-│       ├── A2C
+│   └── test (expected)
+│       └── A2C
 │       └── A4C
 ├── models
 │   ├── A2C_caranet_1.pt
@@ -32,9 +38,11 @@ mkdir models
 │   ├── A4C_caranet_2.pt
 │   ├── A4C_unet_1.pt
 │   └── A4C_unet_2.pt
+├── models.py
 ├── test_predict_mask.py
 ├── final_utils.py
-└── final_test.py
+├── final_test.py
+└── utils.py
 ``` 
 # Validation Evalutation
 
