@@ -36,13 +36,29 @@ mkdir models
 ├── final_utils.py
 └── final_test.py
 ``` 
+# Validation Evalutation
+
 ## How To Use
 - For A2C task
 ```bash
-python final_test.py --data_path "data/test" --data_type "A2C" 
+python final_test.py --data_path "data/validation" --data_type "A2C" 
 ```
 
 - For A4C task
 ```bash
-python final_test.py --data_path "data/test" --data_type "A4C"
+python final_test.py --data_path "data/validation" --data_type "A4C"
+```
+
+
+# Test Prediction
+
+## How To Use
+- For A2C task
+```bash
+python test_predict_mask.py --data_path "data/test" --data_type "A2C" 
+```
+
+- For A4C task
+```bash
+python test_predict_mask.py --data_path "data/test" --data_type "A4C"
 ```

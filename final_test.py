@@ -10,7 +10,7 @@ import numpy as np
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from utils import *
+# from utils import *
 
 from torch.utils.data import DataLoader
 from models import caranet, pretrained_unet
@@ -34,7 +34,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 base_transform = ToTensorV2()
 
 tta_transform = A.Compose([
-            A.RandomContrast(limit=0.1, p=1),
+            A.RandomContrast(limit=0, p=1),
             ToTensorV2(transpose_mask=True)
             ])
 
@@ -86,7 +86,7 @@ size_dict, dataset_tta = make_test_dataset(args.data_path, args.data_type, tta_t
 data_loader_base = DataLoader(dataset, batch_size=1, shuffle=False)
 data_loader_tta = DataLoader(dataset_tta, batch_size=1, shuffle=False)
 
-for m in range(2):
+for m in range(1,2):
     print('caranet:', m+1)
     model = caranet().to(device)
     model.load_state_dict(torch.load(f'models/{args.data_type}_caranet_{m+1}.pt'))
