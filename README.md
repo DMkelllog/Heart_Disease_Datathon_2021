@@ -19,7 +19,7 @@ https://github.com/DatathonInfo/H.D.A.I.2021
 3. **Ensemble**
 * Ensemble of best 4 models (Unet 2, Caranet 2)
 4. **Test Time Augmentation**
-* Aumgentated images used for test prediction
+* Augmentated images used for test prediction
 
 ## Dependencies ##
 * python 3.7.11
