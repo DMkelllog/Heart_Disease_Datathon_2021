@@ -1,5 +1,8 @@
 # Heart_Disease_Datathon_2021
 
+## Task: 심장 초음파 영상 좌심실 영역 분할
+## Team: 리슨투마핫빝
+
 ## Dependencies ##
 * python 3.7.11
 * pytorch 1.9.1
