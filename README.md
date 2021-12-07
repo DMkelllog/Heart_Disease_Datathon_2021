@@ -5,15 +5,15 @@
 강현구 손종욱 유지수 이선빈 홍정민 from SKKU DMLAB
 
 ## Key Points
-1. Pretraining
+1. **Pretraining**
 * Base model pretrained with both A2C and A4C
 * Fine-tuned with target tasks (A2C or A4C)
-2. Architectures
+2. **Architectures**
 * Unet (Pretrained on 2D Brain MRI segmentation)
 * Caranet (SOTA on Kvasir dataset)
-3. Ensemble
+3. **Ensemble**
 * Ensemble of best 4 models (Unet 2, Caranet 2)
-4. Test Time Augmentation
+4. **Test Time Augmentation**
 * Aumgentated images used for test prediction
 
 ## Dependencies ##
