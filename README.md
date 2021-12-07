@@ -1,6 +1,6 @@
 # HEART DISEASE AI DATATHON 2021
 
-주최: 과학기술정보통신부, 한국지능정보사회진흥원
+주최: 과학기술정보통신부, 한국지능정보사회진흥원  
 주관: 서울대학교병원, 연세대학교 산학협력단
 https://github.com/DatathonInfo/H.D.A.I.2021
 
