@@ -1,11 +1,11 @@
 # pretrain
 
 for aug_type in 1 3
+    do
     for model in 'unet' 'caranet'
         do
         # Pretrain
-        python main.py --model_type 'unet' --data_type 'both' --augmentation_type 3 --learning_rate 1e-3
-
+        python main.py --model_type $model --data_type 'both' --augmentation_type 3 --learning_rate 1e-3
         # Fine-tune (A2C) or (A4C)
         ## pretrained_path: pre_both_{aug_type}_{model}_{lr}
         for d_type in 'A2C' 'A4C'
