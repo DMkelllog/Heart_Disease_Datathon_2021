@@ -80,7 +80,7 @@ mkdir models
 bash train.sh
 ```
 
-# Validation Evalutation
+# Evalutation
 
 ## How To Use
 - For A2C task
