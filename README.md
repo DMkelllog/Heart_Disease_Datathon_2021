@@ -23,6 +23,9 @@ mkdir models
 ## Directory
 ```bash
 ├── data
+│   ├── train
+│   │   ├── A2C
+│   │   └── A4C
 │   ├── validation
 │   │   ├── A2C
 │   │   └── A4C
@@ -48,6 +51,13 @@ mkdir models
 └── train.sh
 
 ``` 
+# Train
+
+## How To Use
+```bash
+bash train.sh
+```
+
 # Validation Evalutation
 
 ## How To Use
