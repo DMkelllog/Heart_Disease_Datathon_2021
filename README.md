@@ -9,7 +9,8 @@ https://github.com/DatathonInfo/H.D.A.I.2021
 - 주제1.심초음파 데이터셋을 활용한 좌심실 분할 AI모델 공모(Apical 2 chamber(A2C) & Apical 4 chamber(A4C) view 이미지를 활용해 좌심실 분할하는 딥러닝 모델 개발)
 ## Team: 🫀리슨투마핫빝
 강현구 손종욱 유지수 이선빈 홍정민 from SKKU DMLAB
-![data_info](https://user-images.githubusercontent.com/52904764/144977293-428facda-ed30-45df-85e7-e3c2b01d8d51.png)
+![data_info2](https://user-images.githubusercontent.com/52904764/144977428-0281247d-8061-4a5e-be7a-af4ef6959a4b.png)
+
 
 
 ## Key Points
