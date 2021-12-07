@@ -4,7 +4,7 @@
 ## Team: 리슨투마핫빝
 강현구 손종욱 유지수 이선빈 홍정민 from SKKU DMLAB
 
-## Strategies
+## Key Points
 1. Pretraining
 * Base model pretrained with both A2C and A4C
 * Fine-tuned with target tasks (A2C or A4C)
