@@ -126,7 +126,7 @@ pad_size = 100
 
 for i in range(2):
     print('unet ', i+1)
-    path = f'models/{args.data_type}/unet_{i+1}.pt'
+    path = f'models/{args.data_type}_unet_{i+1}.pt'
     model.load_state_dict(torch.load(path))
 
     # Predict mask
@@ -179,7 +179,7 @@ pad_size = 88
 
 for i in range(2):
     print('caranet ', i+1)
-    path = f'models/{args.data_type}/caranet_{i+1}.pt'
+    path = f'models/{args.data_type}_caranet_{i+1}.pt'
     model.load_state_dict(torch.load(path))
 
     # Predict mask
@@ -213,4 +213,4 @@ ensemble_list = [(ensemble > 0.5) + 0 for ensemble in ensemble_list]
 test_mask_filenames = [npy_file.replace('png','npy') for npy_file in img_list if npy_file.endswith('.png')]
 
 for i, mask_pred in enumerate(ensemble_list):
-    np.save(d_path + '/test/' + test_mask_filenames[i], mask_pred)
+    np.save(d_path +'/'+ test_mask_filenames[i], mask_pred)
